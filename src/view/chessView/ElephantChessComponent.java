@@ -1,4 +1,4 @@
-package view;
+package view.chessView;
 
 
 import model.PlayerColor;
@@ -10,7 +10,7 @@ import java.awt.*;
  * This is the equivalent of the ChessPiece class,
  * but this class only cares how to draw Chess on ChessboardComponent
  */
-public class ElephantChessComponent extends JComponent {
+public class ElephantChessComponent extends AnimalChessComponent {
     private PlayerColor owner;
 
     private boolean selected;
@@ -37,10 +37,16 @@ public class ElephantChessComponent extends JComponent {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        Font font = new Font("楷体", Font.PLAIN, getWidth() / 2);
-        g2.setFont(font);
+            ImageIcon pic = new ImageIcon("chess\\red\\Elephant.jpg");
+        if (owner == PlayerColor.BLUE){
+            pic = new ImageIcon("chess\\blue\\Elephant.jpg");
+        }
+        Image image = pic.getImage();
+        pic = new ImageIcon(image.getScaledInstance(getWidth(), getHeight(),Image.SCALE_SMOOTH));
+        JLabel label = new JLabel(pic);
         g2.setColor(owner.getColor());
-        g2.drawString("象", getWidth() / 4, getHeight() * 5 / 8); // FIXME: Use library to find the correct offset.
+        add(label);
+        g2.drawImage(image,0,0,getWidth(),getHeight(),null);
         if (isSelected()) { // Highlights the model if selected.
             g.setColor(Color.RED);
             g.drawOval(0, 0, getWidth() , getHeight());

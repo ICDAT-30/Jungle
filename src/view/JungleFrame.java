@@ -1,28 +1,26 @@
 package view;
 
-import controller.GameController;
-
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * 这个类表示游戏过程中的整个游戏界面，是一切的载体
  */
-public class ChessGameFrame extends JFrame {
+public class JungleFrame extends JFrame {
     //    public final Dimension FRAME_SIZE ;
     private final int WIDTH;
-    private final int HEIGTH;
+    private final int HEIGHT;
 
     private final int ONE_CHESS_SIZE;
 
     private ChessboardComponent chessboardComponent;
-    public ChessGameFrame(int width, int height) {
-        setTitle("2023 CS109 Project Demo"); //设置标题
+    public JungleFrame(int width, int height) {
+        setTitle("Judge"); //设置标题
         this.WIDTH = width;
-        this.HEIGTH = height;
-        this.ONE_CHESS_SIZE = (HEIGTH * 4 / 5) / 9;
+        this.HEIGHT = height;
+        this.ONE_CHESS_SIZE = (HEIGHT * 4 / 5) / 9;
 
-        setSize(WIDTH, HEIGTH);
+        setSize(WIDTH, HEIGHT);
         setLocationRelativeTo(null); // Center the window.
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); //设置程序关闭按键，如果点击右上方的叉就游戏全部关闭了
         setLayout(null);
@@ -46,7 +44,7 @@ public class ChessGameFrame extends JFrame {
      */
     private void addChessboard() {
         chessboardComponent = new ChessboardComponent(ONE_CHESS_SIZE);
-        chessboardComponent.setLocation(HEIGTH / 5, HEIGTH / 10);
+        chessboardComponent.setLocation(HEIGHT / 5, HEIGHT / 10);
         add(chessboardComponent);
     }
 
@@ -54,8 +52,8 @@ public class ChessGameFrame extends JFrame {
      * 在游戏面板中添加标签
      */
     private void addLabel() {
-        JLabel statusLabel = new JLabel("Sample label");
-        statusLabel.setLocation(HEIGTH, HEIGTH / 10);
+        JLabel statusLabel = new JLabel("123");
+        statusLabel.setLocation(HEIGHT, HEIGHT / 10);
         statusLabel.setSize(200, 60);
         statusLabel.setFont(new Font("Rockwell", Font.BOLD, 20));
         add(statusLabel);
@@ -68,7 +66,7 @@ public class ChessGameFrame extends JFrame {
     private void addHelloButton() {
         JButton button = new JButton("Show Hello Here");
         button.addActionListener((e) -> JOptionPane.showMessageDialog(this, "Hello, world!"));
-        button.setLocation(HEIGTH, HEIGTH / 10 + 120);
+        button.setLocation(HEIGHT, HEIGHT / 10 + 120);
         button.setSize(200, 60);
         button.setFont(new Font("Rockwell", Font.BOLD, 20));
         add(button);

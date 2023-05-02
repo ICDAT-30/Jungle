@@ -1,5 +1,10 @@
 package model;
 
+import view.chessView.ElephantChessComponent;
+
+import java.util.HashMap;
+import java.util.HashSet;
+
 /**
  * This class store the real chess information.
  * The Chessboard has 9*7 cells, and each cell has a position for chess
@@ -24,8 +29,22 @@ public class Chessboard {
     }
 
     private void initPieces() {
-        grid[0][0].setPiece(new ChessPiece(PlayerColor.BLUE, "Elephant",8));
-        grid[8][6].setPiece(new ChessPiece(PlayerColor.RED, "Elephant",8));
+        grid[2][6].setPiece(new ChessPiece(PlayerColor.RED, "Elephant",8));
+        grid[6][0].setPiece(new ChessPiece(PlayerColor.BLUE, "Elephant",8));
+        grid[0][0].setPiece(new ChessPiece(PlayerColor.RED,"Lion",7));
+        grid[8][6].setPiece(new ChessPiece(PlayerColor.BLUE,"Lion",7));
+        grid[0][6].setPiece(new ChessPiece(PlayerColor.RED,"Tiger",6));
+        grid[8][0].setPiece(new ChessPiece(PlayerColor.BLUE,"Tiger",6));
+        grid[2][2].setPiece(new ChessPiece(PlayerColor.RED,"Leopard",5));
+        grid[6][4].setPiece(new ChessPiece(PlayerColor.BLUE,"Leopard",5));
+        grid[2][4].setPiece(new ChessPiece(PlayerColor.RED,"Wolf",4));
+        grid[6][2].setPiece(new ChessPiece(PlayerColor.BLUE,"Wolf",4));
+        grid[1][1].setPiece(new ChessPiece(PlayerColor.RED,"Dog",3));
+        grid[7][5].setPiece(new ChessPiece(PlayerColor.BLUE,"Dog",3));
+        grid[1][5].setPiece(new ChessPiece(PlayerColor.RED,"Cat",2));
+        grid[7][1].setPiece(new ChessPiece(PlayerColor.BLUE,"Cat",2));
+        grid[2][0].setPiece(new ChessPiece(PlayerColor.RED,"Rat",1));
+        grid[6][6].setPiece(new ChessPiece(PlayerColor.BLUE,"Rat",1));
     }
 
     private ChessPiece getChessPieceAt(ChessboardPoint point) {
@@ -72,10 +91,36 @@ public class Chessboard {
     }
 
     public boolean isValidMove(ChessboardPoint src, ChessboardPoint dest) {
+        HashSet<ChessboardPoint> river = new HashSet<>();
+        river.add(new ChessboardPoint(3,1));
+        river.add(new ChessboardPoint(3,2));
+        river.add(new ChessboardPoint(4,1));
+        river.add(new ChessboardPoint(4,2));
+        river.add(new ChessboardPoint(5,1));
+        river.add(new ChessboardPoint(5,2));
+
+        river.add(new ChessboardPoint(3,4));
+        river.add(new ChessboardPoint(3,5));
+        river.add(new ChessboardPoint(4,4));
+        river.add(new ChessboardPoint(4,5));
+        river.add(new ChessboardPoint(5,4));
+        river.add(new ChessboardPoint(5,5));
         if (getChessPieceAt(src) == null || getChessPieceAt(dest) != null) {
             return false;
         }
-        return calculateDistance(src, dest) == 1;
+        if (getChessPieceAt(src).getName().equals("Elephant")
+                | getChessPieceAt(src).getName().equals("Leopard")
+                | getChessPieceAt(src).getName().equals("Dog")
+                | getChessPieceAt(src).getName().equals("Wolf")
+                | getChessPieceAt(src).getName().equals("Cat")){
+            if (river.contains(dest)){
+                return false;
+            }else {
+                return calculateDistance(src, dest) == 1;
+            }
+//TODO: finish it.
+        }
+        return  false;
     }
 
 

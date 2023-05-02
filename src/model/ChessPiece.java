@@ -1,12 +1,16 @@
 package model;
 
 
+import java.awt.*;
+
 public class ChessPiece {
     // the owner of the chess
     private PlayerColor owner;
 
     // Elephant? Cat? Dog? ...
     private String name;
+
+    private Image image;
     private int rank;
 
     public ChessPiece(PlayerColor owner, String name, int rank) {

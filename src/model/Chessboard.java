@@ -119,6 +119,13 @@ public class Chessboard {
                 return calculateDistance(src, dest) == 1;
             }
 //TODO: finish it.
+        } else if (getChessPieceAt(src).getName().equals("Lion")
+                |getChessPieceAt(src).getName().equals("Tiger")) {
+            if (river.contains(dest)){
+                return false;
+            }else if(){
+
+            }
         }
         return  false;
     }

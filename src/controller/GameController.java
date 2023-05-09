@@ -31,7 +31,7 @@ public class GameController implements GameListener {
     public GameController(ChessboardComponent view, Chessboard model) {
         this.view = view;
         this.model = model;
-        this.currentPlayer = PlayerColor.BLUE;
+        this.currentPlayer = PlayerColor.RED;
 
         view.registerController(this);
         initialize();
@@ -42,7 +42,7 @@ public class GameController implements GameListener {
     private void initialize() {
         for (int i = 0; i < Constant.CHESSBOARD_ROW_SIZE.getNum(); i++) {
             for (int j = 0; j < Constant.CHESSBOARD_COL_SIZE.getNum(); j++) {
-
+//TODO:这是在干嘛？先打个todo
             }
         }
     }
@@ -63,11 +63,13 @@ public class GameController implements GameListener {
     public void onPlayerClickCell(ChessboardPoint point, CellComponent component) {
         if (selectedPoint != null && model.isValidMove(selectedPoint, point)) {
             model.moveChessPiece(selectedPoint, point);
+
             view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));
+
             selectedPoint = null;
             swapColor();
             view.repaint();
-            // TODO: if the chess enter Dens or Traps and so on
+            // TODO: if the chess enter Dens or Traps and so on 好像全写到move里了？不确定，再看看
         }
     }
 
@@ -84,7 +86,17 @@ public class GameController implements GameListener {
             selectedPoint = null;
             component.setSelected(false);
             component.repaint();
+        } else  {
+            if (model.isValidCapture(selectedPoint,point)){
+                model.captureChessPiece(selectedPoint,point);
+                view.removeChessComponentAtGrid(point);
+                view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));
+                selectedPoint = null;
+                swapColor();
+                view.repaint();
+            }
         }
+
         // TODO: Implement capture function
     }
 }

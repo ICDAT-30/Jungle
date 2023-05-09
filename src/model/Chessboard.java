@@ -11,7 +11,7 @@ import java.util.HashSet;
  */
 public class Chessboard {
     private Cell[][] grid;
-    public HashSet<ChessboardPoint> river;
+    private HashSet<ChessboardPoint> river;
 
     public Chessboard() {
         this.grid =
@@ -42,6 +42,14 @@ public class Chessboard {
                 grid[i][j] = new Cell();
             }
         }
+        grid[0][2].setType(CellType.RED_TRAP);
+        grid[1][3].setType(CellType.RED_TRAP);
+        grid[0][4].setType(CellType.RED_TRAP);
+        grid[0][2].setType(CellType.BLUE_TRAP);
+        grid[7][3].setType(CellType.BLUE_TRAP);
+        grid[8][4].setType(CellType.BLUE_TRAP);
+        grid[0][3].setType(CellType.RED_DEN);
+        grid[8][3].setType(CellType.BLUE_DEN);
     }
 
     private void initPieces() {
@@ -89,14 +97,23 @@ public class Chessboard {
         if (!isValidMove(src, dest)) {
             throw new IllegalArgumentException("Illegal chess move!");
         }
+        if (getGridAt(src).getType() != null && (getGridAt(src).getType().equals(CellType.RED_TRAP)
+                | getGridAt(src).getType().equals(CellType.BLUE_TRAP))) {
+            outOfTrap(src, dest);
+        }
+        if (getGridAt(src).getType() != null && (getGridAt(dest).getType().equals(CellType.RED_TRAP)
+                | getGridAt(dest).getType().equals(CellType.BLUE_TRAP))) {
+            intoTrap(src, dest);
+        }
         setChessPiece(dest, removeChessPiece(src));
     }
 
     public void captureChessPiece(ChessboardPoint src, ChessboardPoint dest) {
-        if (isValidCapture(src, dest)) {
+        if (!isValidCapture(src, dest)) {
             throw new IllegalArgumentException("Illegal chess capture!");
         }
-        // TODO: Finish the method.
+        removeChessPiece(dest);//TODO: remove的棋子用什么储存？
+        setChessPiece(dest, removeChessPiece(src));
     }
 
     public Cell[][] getGrid() {
@@ -109,7 +126,7 @@ public class Chessboard {
 
     public boolean isValidMove(ChessboardPoint src, ChessboardPoint dest) {
 
-        if (getChessPieceAt(src) == null || getChessPieceAt(dest) != null) {
+        if (getChessPieceAt(src) == null) {
             return false;
         }
 //象，豹，狼，狗，猫的行棋逻辑
@@ -137,7 +154,7 @@ public class Chessboard {
                     return false;   //判断是不是在一行
                 } else if (x == 0) {
                     boolean allRiver = true;
-                    for (int i = Math.min(src.getCol(), dest.getCol()) + 1; i < Math.max(src.getCol(), dest.getCol()) ; i++) {
+                    for (int i = Math.min(src.getCol(), dest.getCol()) + 1; i < Math.max(src.getCol(), dest.getCol()); i++) {
                         ChessboardPoint point = new ChessboardPoint(src.getRow(), i);
                         if (getChessPieceAt(point) != null) {
                             return false;
@@ -148,9 +165,9 @@ public class Chessboard {
                         }
                     }
                     return allRiver;
-                } else  {
+                } else {
                     boolean allRiver = true;
-                    for (int i = Math.min(src.getRow(), dest.getRow()) + 1; i < Math.max(src.getRow(), dest.getRow()) ; i++) {
+                    for (int i = Math.min(src.getRow(), dest.getRow()) + 1; i < Math.max(src.getRow(), dest.getRow()); i++) {
                         ChessboardPoint point = new ChessboardPoint(i, src.getCol());
                         if (getChessPieceAt(point) != null) {
                             return false;
@@ -163,15 +180,32 @@ public class Chessboard {
                     return allRiver;
                 }
             }
-        }else {
+//鼠鼠的行棋逻辑
+        } else {
             return calculateDistance(src, dest) == 1;
         }
     }
 
 
     public boolean isValidCapture(ChessboardPoint src, ChessboardPoint dest) {
-        // TODO:Fix this method
+        if (getChessPieceAt(src) != null | getChessPieceAt(dest) != null) {
+            if (getChessPieceOwner(src) != getChessPieceOwner(dest))
+                return getChessPieceAt(src).canCapture(getChessPieceAt(dest)) && isValidMove(src, dest);
+        }
         return false;
+    }
 
+    public void intoTrap(ChessboardPoint src, ChessboardPoint dest) {
+        if (getGridAt(dest).getType().equals(CellType.RED_TRAP)
+                && getChessPieceAt(src).getOwner().equals(PlayerColor.BLUE)) {
+            getChessPieceAt(src).setRank(0);
+        } else if (getGridAt(dest).getType().equals(CellType.BLUE_TRAP)
+                && getChessPieceAt(src).getOwner().equals(PlayerColor.RED)) {
+            getChessPieceAt(src).setRank(0);
+        }
+    }
+
+    public void outOfTrap(ChessboardPoint src, ChessboardPoint dest) {
+        getChessPieceAt(src).setRank(getChessPieceAt(src).getName());
     }
 }

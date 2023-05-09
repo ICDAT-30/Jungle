@@ -1,7 +1,10 @@
 package view;
 
+import model.Chessboard;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  * 这个类表示游戏过程中的整个游戏界面，是一切的载体
@@ -28,7 +31,7 @@ public class JungleFrame extends JFrame {
 
         addChessboard();
         addLabel();
-        addHelloButton();
+        addRestartButton();
     }
 
     public ChessboardComponent getChessboardComponent() {
@@ -63,9 +66,15 @@ public class JungleFrame extends JFrame {
      * 在游戏面板中增加一个按钮，如果按下的话就会显示Hello, world!
      */
 
-    private void addHelloButton() {
+    private void addRestartButton() {
         JButton button = new JButton("Show Hello Here");
-        button.addActionListener((e) -> JOptionPane.showMessageDialog(this, "Hello, world!"));
+        button.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //TODO
+
+            }
+        });
         button.setLocation(HEIGHT, HEIGHT / 10 + 120);
         button.setSize(200, 60);
         button.setFont(new Font("Rockwell", Font.BOLD, 20));

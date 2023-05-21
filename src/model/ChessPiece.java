@@ -67,4 +67,8 @@ public class ChessPiece {
     public PlayerColor getOwner() {
         return owner;
     }
+    public String getColor(){
+        if(this.getOwner().equals(PlayerColor.RED)) return "RED";
+        return "BLUE";
+    }
 }

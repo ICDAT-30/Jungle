@@ -8,10 +8,10 @@ import java.awt.*;
  * but this class only cares how to draw Cells on ChessboardComponent
  */
 
-public class CellComponent extends JPanel {
+public class CellView extends JPanel {
     private Color background;
 
-    public CellComponent(Color background, Point location, int size) {
+    public CellView(Color background, Point location, int size) {
         setLayout(new GridLayout(1,1));
         setLocation(location);
         setSize(size, size);

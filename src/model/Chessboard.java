@@ -2,8 +2,14 @@ package model;
 
 import view.chessView.ElephantChessComponent;
 
-import java.util.HashMap;
+import javax.swing.*;
+import java.util.ArrayList;
+
 import java.util.HashSet;
+import java.util.List;
+
+import static model.Constant.CHESSBOARD_COL_SIZE;
+import static model.Constant.CHESSBOARD_ROW_SIZE;
 
 /**
  * This class store the real chess information.
@@ -13,10 +19,16 @@ public class Chessboard {
     private Cell[][] grid;
     private HashSet<ChessboardPoint> river;
 
+    private List<Step> steps;
+    private ArrayList<ChessPiece> redDead;
+    private ArrayList<ChessPiece> blueDead;
+
     public Chessboard() {
         this.grid =
                 new Cell[Constant.CHESSBOARD_ROW_SIZE.getNum()][Constant.CHESSBOARD_COL_SIZE.getNum()];//19X19
-
+        this.steps = new ArrayList<>();
+        this.redDead = new ArrayList<>();
+        this.blueDead = new ArrayList<>();
         initGrid();
         initPieces();
         HashSet<ChessboardPoint> river2 = new HashSet<>();
@@ -53,6 +65,11 @@ public class Chessboard {
     }
 
     private void initPieces() {
+        for (int i = 0; i < Constant.CHESSBOARD_ROW_SIZE.getNum(); i++) {
+            for (int j = 0; j < CHESSBOARD_COL_SIZE.getNum(); j++) {
+                grid[i][j].removePiece();
+            }
+        }
         grid[2][6].setPiece(new ChessPiece(PlayerColor.RED, "Elephant", 8));
         grid[6][0].setPiece(new ChessPiece(PlayerColor.BLUE, "Elephant", 8));
         grid[0][0].setPiece(new ChessPiece(PlayerColor.RED, "Lion", 7));
@@ -71,7 +88,8 @@ public class Chessboard {
         grid[6][6].setPiece(new ChessPiece(PlayerColor.BLUE, "Rat", 1));
     }
 
-    private ChessPiece getChessPieceAt(ChessboardPoint point) {
+    //TODO:记得改private
+    public ChessPiece getChessPieceAt(ChessboardPoint point) {
         return getGridAt(point).getPiece();
     }
 
@@ -93,18 +111,31 @@ public class Chessboard {
         getGridAt(point).setPiece(chessPiece);
     }
 
+    public void initBoard() {
+        initGrid();
+        initPieces();
+    }
+
     public void moveChessPiece(ChessboardPoint src, ChessboardPoint dest) {
+        int a = 0;//test
         if (!isValidMove(src, dest)) {
             throw new IllegalArgumentException("Illegal chess move!");
         }
-        if (getGridAt(src).getType() != null && (getGridAt(src).getType().equals(CellType.RED_TRAP)
-                | getGridAt(src).getType().equals(CellType.BLUE_TRAP))) {
-            outOfTrap(src, dest);
+        //TODO:进入兽穴rank = 0 出现问题
+        if (getGridAt(src).getType() != null) {
+            if (getGridAt(src).getType().equals(CellType.RED_TRAP)
+                    | getGridAt(src).getType().equals(CellType.BLUE_TRAP)) {
+                this.outOfTrap(src, dest);
+            }
         }
-        if (getGridAt(src).getType() != null && (getGridAt(dest).getType().equals(CellType.RED_TRAP)
-                | getGridAt(dest).getType().equals(CellType.BLUE_TRAP))) {
-            intoTrap(src, dest);
+        if (getGridAt(dest).getType() != null) {
+            if (getGridAt(dest).getType().equals(CellType.RED_TRAP)
+                    | getGridAt(dest).getType().equals(CellType.BLUE_TRAP)) {
+                //a =
+                this.intoTrap(src, dest); //test
+            }
         }
+        steps.add(new Step(src, dest, getChessPieceAt(src)));
         setChessPiece(dest, removeChessPiece(src));
     }
 
@@ -112,7 +143,14 @@ public class Chessboard {
         if (!isValidCapture(src, dest)) {
             throw new IllegalArgumentException("Illegal chess capture!");
         }
-        removeChessPiece(dest);//TODO: remove的棋子用什么储存？
+        //TODO:有可能出问题
+        steps.add(new Step(src, dest, getChessPieceAt(src), getChessPieceAt(dest)));
+        if (getChessPieceAt(dest).getOwner().equals(PlayerColor.RED)) {
+            redDead.add(getChessPieceAt(dest));
+        } else {
+            blueDead.add(getChessPieceAt(dest));
+        }
+        removeChessPiece(dest);
         setChessPiece(dest, removeChessPiece(src));
     }
 
@@ -197,15 +235,50 @@ public class Chessboard {
 
     public void intoTrap(ChessboardPoint src, ChessboardPoint dest) {
         if (getGridAt(dest).getType().equals(CellType.RED_TRAP)
-                && getChessPieceAt(src).getOwner().equals(PlayerColor.BLUE)) {
+                & getChessPieceAt(src).getOwner().equals(PlayerColor.BLUE)) {
             getChessPieceAt(src).setRank(0);
+//            return 1;
         } else if (getGridAt(dest).getType().equals(CellType.BLUE_TRAP)
-                && getChessPieceAt(src).getOwner().equals(PlayerColor.RED)) {
+                & getChessPieceAt(src).getOwner().equals(PlayerColor.RED)) {
             getChessPieceAt(src).setRank(0);
+//            return 2;
         }
+//        return  0;
     }
 
     public void outOfTrap(ChessboardPoint src, ChessboardPoint dest) {
         getChessPieceAt(src).setRank(getChessPieceAt(src).getName());
+    }
+
+    public PlayerColor checkWin() {
+        if (grid[0][3].getPiece() != null) {
+            if (grid[0][3].getPiece().getOwner() == PlayerColor.BLUE) {
+                return PlayerColor.BLUE;
+            }
+        }
+        if (grid[8][3].getPiece() != null) {
+            if (grid[8][3].getPiece().getOwner() == PlayerColor.RED) {
+                return PlayerColor.RED;
+            }
+        }
+        if (blueDead.size() == 8) {
+            return PlayerColor.RED;
+        }
+        if (redDead.size() == 8) {
+            return PlayerColor.BLUE;
+        }
+        return null;
+    }
+
+    public List<Step> getSteps() {
+        return steps;
+    }
+
+    public ArrayList<ChessPiece> getRedDead() {
+        return redDead;
+    }
+
+    public ArrayList<ChessPiece> getBlueDead() {
+        return blueDead;
     }
 }

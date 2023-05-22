@@ -18,4 +18,10 @@ public enum PlayerColor {
     public Color getColor() {
         return color;
     }
+    public String toString(){
+        if (color.equals(Color.RED)){
+            return "RED";
+        }
+        return "BLUE";
+    }
 }

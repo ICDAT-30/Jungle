@@ -4,10 +4,11 @@ package controller;
 import listener.GameListener;
 import model.*;
 import view.CellView;
-import view.chessView.AnimalChessComponent;
+import view.chessView.*;
 import view.ChessboardView;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +50,7 @@ public class GameController implements GameListener {
     private void initialize() {
         for (int i = 0; i < Constant.CHESSBOARD_ROW_SIZE.getNum(); i++) {
             for (int j = 0; j < Constant.CHESSBOARD_COL_SIZE.getNum(); j++) {
-//TODO:这是在干嘛？先打个todo
+//这是在干嘛？先打个todo re：到要结束了也没明白，不管了
             }
         }
     }
@@ -71,21 +72,26 @@ public class GameController implements GameListener {
     @Override
     public void onPlayerClickCell(ChessboardPoint point, CellView component) {
         if (selectedPoint != null && model.isValidMove(selectedPoint, point)) {
-            System.out.println(model.getChessPieceAt(selectedPoint).getRank());
+            //System.out.println(model.getChessPieceAt(selectedPoint).getRank());
             model.moveChessPiece(selectedPoint, point);
             //为什么有返回值之后就可以了？？？？草 太难绷了 re:好了，虽然不知道怎么好的
             //System.out.println(a);
-            System.out.println(model.getChessPieceAt(point).getRank());
+            //System.out.println(model.getChessPieceAt(point).getRank());
             view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));
             selectedPoint = null;
             swapColor();
-            //TODO:更新label
+            //更新label
+            String text = String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString());
+            view.statusLabel.setText(text);
             view.repaint();
             winner = checkWin();
             if (win()) {
-                System.out.println("win!");//test
+                JOptionPane.showMessageDialog(null, winner.toString() + " is win!");
+                reSet();
+                return;
             }
-            // TODO: if the chess enter Dens or Traps and so on 好像全写到move里了？不确定，再看看
+            // if the chess enter Dens or Traps and so on 好像全写到move里了？不确定，再看看
+            //System.out.println(steps.size());
         }
     }
 
@@ -97,6 +103,7 @@ public class GameController implements GameListener {
                 selectedPoint = point;
                 component.setSelected(true);
                 component.repaint();
+                //TODO：选中棋子画圈在哪，找不到了
             }
         } else if (selectedPoint.equals(point)) {
             selectedPoint = null;
@@ -109,24 +116,34 @@ public class GameController implements GameListener {
                 view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));
                 selectedPoint = null;
                 swapColor();
+                String text = String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString());
+                view.statusLabel.setText(text);
+                deadPic();
                 view.repaint();
                 winner = checkWin();
                 if (win()) {
-                    System.out.println("win!");//test
+                    JOptionPane.showMessageDialog(null, winner.toString() + " is win!");
+                    reSet();
+                    return;
                 }
             }
         }
-
-        // TODO: Implement capture function
     }
 
     public void reSet() {
-        //TODO:烦死了烦死了烦死了这个破架构怎么看不懂
+        //烦死了烦死了烦死了这个破架构怎么看不懂 解决了，但是还是没看懂，算了能用就行
         this.currentPlayer = PlayerColor.BLUE;
         model.initBoard();
+        view.removeChessComponent();
+        //view.gridComponents = new CellView[9][7];
         view.initiateChessComponent(model);
-        view.initiateGridComponents();
+        //view.initiateGridComponents();
+        view.repaint();
+        view.revalidate();
         selectedPoint = null;
+        this.steps = model.steps;
+        view.statusLabel.setText("Turn 1 : BLUE");
+
     }
 
     public void save(String fileName) throws IOException {
@@ -225,7 +242,7 @@ public class GameController implements GameListener {
         }
         //检测棋盘大小错误
         for (int i = 0; i < 9; i++) {
-            if (board[i].length!= 7){
+            if (board[i].length != 7) {
                 JOptionPane.showMessageDialog(null, "棋盘大小错误\n请重新选择",
                         "棋盘大小错误", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -234,34 +251,34 @@ public class GameController implements GameListener {
         //行棋，并检测棋子步骤错误
         Chessboard chessTest = new Chessboard();
         for (int i = 0; i < steps.length; i++) {
-            if (steps[i][6].equals("null")){
-                ChessboardPoint src = new ChessboardPoint(Integer.parseInt(steps[i][2]),Integer.parseInt(steps[i][3]));
-                ChessboardPoint dest = new ChessboardPoint(Integer.parseInt(steps[i][4]),Integer.parseInt(steps[i][5]));
-                if (chessTest.getChessPieceAt(src) == null){
+            if (steps[i][6].equals("null")) {
+                ChessboardPoint src = new ChessboardPoint(Integer.parseInt(steps[i][2]), Integer.parseInt(steps[i][3]));
+                ChessboardPoint dest = new ChessboardPoint(Integer.parseInt(steps[i][4]), Integer.parseInt(steps[i][5]));
+                if (chessTest.getChessPieceAt(src) == null) {
                     JOptionPane.showMessageDialog(null, "棋子位置错误\n请重新选择",
                             "棋子位置错误", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                if(!chessTest.isValidMove(src,dest)){
+                if (!chessTest.isValidMove(src, dest)) {
                     JOptionPane.showMessageDialog(null, "棋子移动错误\n请重新选择",
                             "棋子移动错误", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                chessTest.moveChessPiece(src,dest);
-            }else {
-                ChessboardPoint src = new ChessboardPoint(Integer.parseInt(steps[i][2]),Integer.parseInt(steps[i][3]));
-                ChessboardPoint dest = new ChessboardPoint(Integer.parseInt(steps[i][4]),Integer.parseInt(steps[i][5]));
-                if (chessTest.getChessPieceAt(src) == null | chessTest.getChessPieceAt(dest) == null){
+                chessTest.moveChessPiece(src, dest);
+            } else {
+                ChessboardPoint src = new ChessboardPoint(Integer.parseInt(steps[i][2]), Integer.parseInt(steps[i][3]));
+                ChessboardPoint dest = new ChessboardPoint(Integer.parseInt(steps[i][4]), Integer.parseInt(steps[i][5]));
+                if (chessTest.getChessPieceAt(src) == null | chessTest.getChessPieceAt(dest) == null) {
                     JOptionPane.showMessageDialog(null, "棋子位置错误\n请重新选择",
                             "棋子位置错误", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                if(!chessTest.isValidCapture(src,dest)){
+                if (!chessTest.isValidCapture(src, dest)) {
                     JOptionPane.showMessageDialog(null, "棋子移动错误\n请重新选择",
                             "棋子移动错误", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                chessTest.captureChessPiece(src,dest);
+                chessTest.captureChessPiece(src, dest);
             }
         }
         //检测棋子移动完位置错误
@@ -269,20 +286,124 @@ public class GameController implements GameListener {
         label:
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 7; j++) {
-                if (chessTest.getChessPieceAt(new ChessboardPoint(i,j)) == null){
+                if (chessTest.getChessPieceAt(new ChessboardPoint(i, j)) == null) {
                     isPosition = board[i][j].equals("null");
-                }else {
-                    isPosition = board[i][j].equals(chessTest.getChessPieceAt(new ChessboardPoint(i,j)).getName());
+                } else {
+                    isPosition = board[i][j].equals(chessTest.getChessPieceAt(new ChessboardPoint(i, j)).getName());
                 }
                 if (!isPosition) break label;
             }
         }
-        if (!isPosition){
+        if (!isPosition) {
             JOptionPane.showMessageDialog(null, "棋子位置错误\n请重新选择",
                     "棋子位置错误", JOptionPane.ERROR_MESSAGE);
             return;
         }
         //没有错误开始还原棋盘
-        //TODO:先写好reset，在重新行棋一遍
+
+        reSet();
+        currentPlayer = player.equals("BLUE") ? PlayerColor.BLUE : PlayerColor.RED;
+        view.statusLabel.setText(String.format("Turn %d : %s", (steps.length) / 2 + 1, currentPlayer.toString()));
+        //statusLabel没有变化 好像不太对 re:controller的steps和board的steps在初始化之后解耦了
+        for (int i = 0; i < steps.length; i++) {
+            ChessboardPoint src = new ChessboardPoint(Integer.parseInt(steps[i][2]), Integer.parseInt(steps[i][3]));
+            ChessboardPoint dest = new ChessboardPoint(Integer.parseInt(steps[i][4]), Integer.parseInt(steps[i][5]));
+            if (steps[i][6].equals("null")) {
+                model.moveChessPiece(src, dest);
+                //System.out.println(1);
+                view.setChessComponentAtGrid(dest, view.removeChessComponentAtGrid(src));
+            } else {
+                model.captureChessPiece(src, dest);
+                //System.out.println(2);
+                view.removeChessComponentAtGrid(dest);
+                view.setChessComponentAtGrid(dest, view.removeChessComponentAtGrid(src));
+            }
+        }
+        view.repaint();
+        view.revalidate();
+    }
+
+    public void regret() {
+        ArrayList<Step> newSteps = new ArrayList<>();
+        if (steps.size() == 0){
+            JOptionPane.showMessageDialog(null, "已到达棋局开始，无法悔棋！",
+                    "无法悔棋", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        for (int i = 0; i < steps.size() - 1; i++) {
+            if (steps.get(i).getCapturedPiece() == null) {
+                newSteps.add(new Step(steps.get(i).getSrc(), steps.get(i).getDest(), steps.get(i).getPiece()));
+            } else {
+                newSteps.add(new Step(steps.get(i).getSrc(), steps.get(i).getDest(),
+                        steps.get(i).getPiece(), steps.get(i).getCapturedPiece()));
+            }
+        }
+        reSet();
+        for (int i = 0; i < newSteps.size(); i++) {
+            if (newSteps.get(i).getCapturedPiece() == null) {
+                model.moveChessPiece(newSteps.get(i).getSrc(), newSteps.get(i).getDest());
+                view.setChessComponentAtGrid(newSteps.get(i).getDest(),
+                        view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
+                swapColor();
+                view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
+            } else {
+                model.captureChessPiece(newSteps.get(i).getSrc(), newSteps.get(i).getDest());
+                view.removeChessComponentAtGrid(newSteps.get(i).getDest());
+                view.setChessComponentAtGrid(newSteps.get(i).getDest(),
+                        view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
+                swapColor();
+                view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
+            }
+        }
+        view.repaint();
+        view.revalidate();
+
+    }
+    //TODO:更美观的方式显示被吃的棋子，但是想不明白怎么写 re：javaswing是傻逼
+    public void deadPic(){
+        for (int i = 0; i < model.getRedDead().size(); i++) {
+            ImageIcon icon;
+            System.out.println("1");
+            if(model.getRedDead().get(i).getName().equals("Elephant")){
+                Image image = new ImageIcon("chess/red/Elephant.jpg").getImage();
+                image = image.getScaledInstance(40, 40,Image.SCALE_DEFAULT);
+                icon = new ImageIcon(image);
+                System.out.println("e");
+                //TODO:路径错了，记得改
+            } else if (model.getRedDead().get(i).getName().equals("Lion")) {
+                Image image = new ImageIcon("resource/chess/red/Lion.jpg").getImage();
+                image = image.getScaledInstance(40, 40,Image.SCALE_DEFAULT);
+                icon = new ImageIcon(image);
+                System.out.println("l");
+            } else if (model.getRedDead().get(i).getName().equals("Tiger")) {
+                Image image = new ImageIcon("resource/chess/red/Tiger.jpg").getImage();
+                image = image.getScaledInstance(40, 40,Image.SCALE_DEFAULT);
+                icon = new ImageIcon(image);
+            } else if (model.getRedDead().get(i).getName().equals("Leopard")) {
+                Image image = new ImageIcon("resource/chess/red/Leopard.jpg").getImage();
+                image = image.getScaledInstance(40, 40,Image.SCALE_DEFAULT);
+                icon = new ImageIcon(image);
+            } else if (model.getRedDead().get(i).getName().equals("Wolf")) {
+                Image image = new ImageIcon("resource/chess/red/Wolf.jpg").getImage();
+                image = image.getScaledInstance(40, 40,Image.SCALE_DEFAULT);
+                icon = new ImageIcon(image);
+            } else if (model.getRedDead().get(i).getName().equals("Dog")) {
+                Image image = new ImageIcon("resource/chess/red/Dog.jpg").getImage();
+                image = image.getScaledInstance(40, 40,Image.SCALE_DEFAULT);
+                icon = new ImageIcon(image);
+            } else if (model.getRedDead().get(i).getName().equals("Cat")) {
+                Image image = new ImageIcon("resource/chess/red/Cat.jpg").getImage();
+                image = image.getScaledInstance(40, 40,Image.SCALE_DEFAULT);
+                icon = new ImageIcon(image);
+            }else {
+                Image image = new ImageIcon("resource/chess/red/Rat.jpg").getImage();
+                image = image.getScaledInstance(40, 40,Image.SCALE_DEFAULT);
+                icon = new ImageIcon(image);
+            }
+            JLabel label = new JLabel();
+            label.setIcon(icon);
+            label.setLocation(600,400);
+            view.gameFrame.mainFrame.add(label);
+        }
     }
 }

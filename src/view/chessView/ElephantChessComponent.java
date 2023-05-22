@@ -5,6 +5,7 @@ import model.PlayerColor;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 /**
  * This is the equivalent of the ChessPiece class,
@@ -44,12 +45,13 @@ public class ElephantChessComponent extends AnimalChessComponent {
         Image image = pic.getImage();
         pic = new ImageIcon(image.getScaledInstance(getWidth(), getHeight(),Image.SCALE_SMOOTH));
         JLabel label = new JLabel(pic);
-        g2.setColor(owner.getColor());
+        g2.setColor(owner.equals(PlayerColor.BLUE)? new Color(173,216,230,100) : new Color(240,128,128,100));
         add(label);
         g2.drawImage(image,0,0,getWidth(),getHeight(),null);
         if (isSelected()) { // Highlights the model if selected.
-            g.setColor(Color.RED);
-            g.drawOval(0, 0, getWidth() , getHeight());
+            Rectangle2D rectangle2D = new Rectangle2D.Double(1, 1,
+                    this.getWidth() - 1, this.getHeight() - 1);
+            g2.fill(rectangle2D);
         }
     }
 }

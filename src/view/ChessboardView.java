@@ -18,7 +18,7 @@ import static model.Constant.CHESSBOARD_ROW_SIZE;
  * This class represents the checkerboard component object on the panel
  */
 public class ChessboardView extends JComponent {
-    private final CellView[][] gridComponents = new CellView[CHESSBOARD_ROW_SIZE.getNum()][CHESSBOARD_COL_SIZE.getNum()];
+    public final CellView[][] gridComponents = new CellView[CHESSBOARD_ROW_SIZE.getNum()][CHESSBOARD_COL_SIZE.getNum()];
     private final int CHESS_SIZE;
     private final Set<ChessboardPoint> riverCell = new HashSet<>();
     private final Set<ChessboardPoint> trapCell = new HashSet<>();
@@ -26,9 +26,13 @@ public class ChessboardView extends JComponent {
     private final Set<ChessboardPoint> denCell = new HashSet<>();
 
 
-    private JLabel statusLabel;
-    public GameController gameController;
 
+
+    public JLabel statusLabel;
+    public GameController gameController;
+    public GameFrame gameFrame;
+
+    public Color color;
     public ChessboardView(int chessSize, JLabel statusLabel) {
         this.statusLabel = statusLabel;
         CHESS_SIZE = chessSize;
@@ -40,6 +44,7 @@ public class ChessboardView extends JComponent {
         System.out.printf("chessboard width, height = [%d : %d], chess size = %d\n", width, height, CHESS_SIZE);
 
         initiateGridComponents();
+        this.color = new Color(0,1,1,0);
     }
 
 
@@ -52,7 +57,6 @@ public class ChessboardView extends JComponent {
         for (int i = 0; i < CHESSBOARD_ROW_SIZE.getNum(); i++) {
             for (int j = 0; j < CHESSBOARD_COL_SIZE.getNum(); j++) {
                 // TODO: Implement the initialization checkerboard
-
                 if (grid[i][j].getPiece() != null) {
                     ChessPiece chessPiece = grid[i][j].getPiece();
                     System.out.println(chessPiece.getOwner());
@@ -135,16 +139,17 @@ public class ChessboardView extends JComponent {
                 ChessboardPoint temp = new ChessboardPoint(i, j);
                 CellView cell;
                 if (riverCell.contains(temp)) {
-                    cell = new CellView(Color.CYAN, calculatePoint(i, j), CHESS_SIZE);
+                    cell = new CellView(new Color(0,0,0,0), calculatePoint(i, j), CHESS_SIZE);
+
                     this.add(cell);
                 } else if (trapCell.contains(temp)) {
-                    cell = new CellView(Color.DARK_GRAY,calculatePoint(i,j),CHESS_SIZE);
+                    cell = new CellView(new Color(0,0,0,0),calculatePoint(i,j),CHESS_SIZE);
                     this.add(cell);
                 } else if (denCell.contains(temp)) {
-                    cell = new CellView(Color.ORANGE,calculatePoint(i,j),CHESS_SIZE);
+                    cell = new CellView(new Color(0,0,0,0),calculatePoint(i,j),CHESS_SIZE);
                     this.add(cell);
                 } else {
-                    cell = new CellView(Color.LIGHT_GRAY, calculatePoint(i, j), CHESS_SIZE);
+                    cell = new CellView(new Color(0,0,0,0), calculatePoint(i, j), CHESS_SIZE);
                     this.add(cell);
                 }
                 gridComponents[i][j] = cell;
@@ -159,7 +164,15 @@ public class ChessboardView extends JComponent {
     public void setChessComponentAtGrid(ChessboardPoint point, AnimalChessComponent chess) {
         getGridComponentAt(point).add(chess);
     }
-
+    public void removeChessComponent() {
+        for (int i = 0; i < CHESSBOARD_ROW_SIZE.getNum(); i++) {
+            for (int j = 0; j < CHESSBOARD_COL_SIZE.getNum(); j++) {
+                try {
+                    gridComponents[i][j].remove(0);
+                } catch (Exception e){}
+            }
+        }
+    }
     public AnimalChessComponent removeChessComponentAtGrid(ChessboardPoint point) {
         // Note re-validation is required after remove / removeAll.
         AnimalChessComponent chess = (AnimalChessComponent) getGridComponentAt(point).getComponents()[0];

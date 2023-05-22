@@ -1,0 +1,50 @@
+38
+BLUE
+BLUE Leopard 6 4 6 3 null
+RED Wolf 2 4 2 3 null
+BLUE Dog 7 5 6 5 null
+RED Wolf 2 3 3 3 null
+BLUE Lion 8 6 7 6 null
+RED Cat 1 5 2 5 null
+BLUE Dog 6 5 6 4 null
+RED Wolf 3 3 4 3 null
+BLUE Rat 6 6 5 6 null
+RED Wolf 4 3 5 3 null
+BLUE Leopard 6 3 5 3 RED Wolf
+RED Elephant 2 6 3 6 null
+BLUE Lion 7 6 6 6 null
+RED Cat 2 5 2 4 null
+BLUE Rat 5 6 4 6 null
+RED Rat 2 0 3 0 null
+BLUE Lion 6 6 6 5 null
+RED Leopard 2 2 2 3 null
+BLUE Lion 6 5 2 5 null
+RED Leopard 2 3 3 3 null
+BLUE Leopard 5 3 4 3 null
+RED Cat 2 4 2 3 null
+BLUE Leopard 4 3 3 3 RED Leopard
+RED Rat 3 0 4 0 null
+BLUE Rat 4 6 3 6 RED Elephant
+RED Cat 2 3 2 4 null
+BLUE Lion 2 5 2 4 RED Cat
+RED Dog 1 1 2 1 null
+BLUE Leopard 3 3 2 3 null
+RED Lion 0 0 0 1 null
+BLUE Leopard 2 3 2 2 null
+RED Lion 0 1 1 1 null
+BLUE Leopard 2 2 2 1 RED Dog
+RED Rat 4 0 5 0 null
+BLUE Lion 2 4 2 3 null
+RED Lion 1 1 1 2 null
+BLUE Lion 2 3 2 2 null
+RED Tiger 0 6 1 6 null
+
+null null null null null null null 
+null null Lion null null null Tiger 
+null Leopard Lion null null null null 
+null null null null null null Rat 
+null null null null null null null 
+Rat null null null null null null 
+Elephant null Wolf null Dog null null 
+null Cat null null null null null 
+Tiger null null null null null null 

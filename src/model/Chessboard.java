@@ -19,7 +19,7 @@ public class Chessboard {
     private Cell[][] grid;
     private HashSet<ChessboardPoint> river;
 
-    private List<Step> steps;
+    public List<Step> steps;
     private ArrayList<ChessPiece> redDead;
     private ArrayList<ChessPiece> blueDead;
 
@@ -88,7 +88,7 @@ public class Chessboard {
         grid[6][6].setPiece(new ChessPiece(PlayerColor.BLUE, "Rat", 1));
     }
 
-    //TODO:记得改private
+    //记得改private re：没啥可改的，写着写着就会发现还是public好
     public ChessPiece getChessPieceAt(ChessboardPoint point) {
         return getGridAt(point).getPiece();
     }
@@ -114,6 +114,9 @@ public class Chessboard {
     public void initBoard() {
         initGrid();
         initPieces();
+        this.steps = new ArrayList<>();
+        this.redDead = new ArrayList<>();
+        this.blueDead = new ArrayList<>();
     }
 
     public void moveChessPiece(ChessboardPoint src, ChessboardPoint dest) {
@@ -121,7 +124,7 @@ public class Chessboard {
         if (!isValidMove(src, dest)) {
             throw new IllegalArgumentException("Illegal chess move!");
         }
-        //TODO:进入兽穴rank = 0 出现问题
+        //进入兽穴rank = 0 出现问题  re：已解决但是不知道为什么一直没有删掉todo
         if (getGridAt(src).getType() != null) {
             if (getGridAt(src).getType().equals(CellType.RED_TRAP)
                     | getGridAt(src).getType().equals(CellType.BLUE_TRAP)) {
@@ -143,7 +146,7 @@ public class Chessboard {
         if (!isValidCapture(src, dest)) {
             throw new IllegalArgumentException("Illegal chess capture!");
         }
-        //TODO:有可能出问题
+        //有可能出问题  re：看起来没问题
         steps.add(new Step(src, dest, getChessPieceAt(src), getChessPieceAt(dest)));
         if (getChessPieceAt(dest).getOwner().equals(PlayerColor.RED)) {
             redDead.add(getChessPieceAt(dest));
@@ -164,9 +167,19 @@ public class Chessboard {
 
     public boolean isValidMove(ChessboardPoint src, ChessboardPoint dest) {
 
-        if (getChessPieceAt(src) == null) {
+        if (getChessPieceAt(src) == null ) {
             return false;
         }
+        if (getGridAt(dest).getType()!=null){
+            if (getChessPieceAt(src).getOwner().equals(PlayerColor.RED)){
+                getGridAt(dest).getType().equals(CellType.RED_DEN);
+                return false;
+            }else{
+                getGridAt(dest).getType().equals(CellType.BLUE_DEN);
+                return false;
+            }
+        }
+
 //象，豹，狼，狗，猫的行棋逻辑
         if (getChessPieceAt(src).getName().equals("Elephant")
                 | getChessPieceAt(src).getName().equals("Leopard")

@@ -15,6 +15,7 @@ public class CellView extends JPanel {
 
     private boolean canMove;
 
+    private boolean isLastMove;
 
     public CellView(Color background, Point location, int size) {
         setLayout(new GridLayout(1,1));
@@ -36,6 +37,14 @@ public class CellView extends JPanel {
                     this.getWidth() - 1, this.getHeight() - 1);
             g2d.fill(Rectangle);
         }
+        if (isLastMove){
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setColor(new Color(255, 255, 255, 100));
+            Rectangle2D Rectangle = new Rectangle2D.Double(1, 1,
+                    this.getWidth() - 1, this.getHeight() - 1);
+            g2d.fill(Rectangle);
+        }
+
     }
 
     @Override
@@ -54,5 +63,9 @@ public class CellView extends JPanel {
 
     public void setCanMove(boolean canMove) {
         this.canMove = canMove;
+    }
+
+    public void setLastMove(boolean lastMove) {
+        isLastMove = lastMove;
     }
 }

@@ -38,9 +38,9 @@ public class RatChessComponent extends AnimalChessComponent {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        ImageIcon pic = new ImageIcon("chess/red/Rat.jpg");
+        ImageIcon pic = new ImageIcon("chess/red/Rat.png");
         if (owner == PlayerColor.BLUE){
-            pic = new ImageIcon("chess/blue/Rat.jpg");
+            pic = new ImageIcon("chess/blue/Rat.png");
         }
         Image image = pic.getImage();
         pic = new ImageIcon(image.getScaledInstance(getWidth(), getHeight(),Image.SCALE_SMOOTH));

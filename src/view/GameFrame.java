@@ -21,8 +21,7 @@ public class GameFrame extends JFrame {
     JLabel background;
     JLabel chessboard;
     private ChessboardView chessboardView;
-    public DeadChessView redDead;
-    public DeadChessView blueDead;
+
     public MainFrame mainFrame;
     public final JLabel bg1;
     public final JLabel bg2;
@@ -73,7 +72,7 @@ public class GameFrame extends JFrame {
 
         addStatusLabel();
         addChessboard();
-        addDeadChess();
+
         addResetButton();
         addSaveButton();
         addLoadButton();
@@ -104,17 +103,7 @@ public class GameFrame extends JFrame {
         add(chessboardView);
     }
 
-    private void addDeadChess(){
-        redDead =new DeadChessView(ONE_CHESS_SIZE, PlayerColor.RED,chessboardView.gameController, this);
-        redDead.setLocation(HEIGHT - 40,HEIGHT / 10);
 
-        add(redDead);
-
-        blueDead =new DeadChessView(ONE_CHESS_SIZE,PlayerColor.BLUE,chessboardView.gameController,this);
-        blueDead.setLocation(HEIGHT - 40,HEIGHT / 10+ONE_CHESS_SIZE*5);
-
-        add(blueDead);
-    }
     /**
      * 在游戏面板中添加标签
      */

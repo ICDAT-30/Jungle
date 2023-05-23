@@ -4,7 +4,7 @@ package controller;
 import listener.GameListener;
 import model.*;
 import view.CellView;
-import view.DeadChessView;
+
 import view.chessView.*;
 import view.ChessboardView;
 
@@ -25,8 +25,7 @@ public class GameController implements GameListener {
 
     public Chessboard model;
     private ChessboardView view;
-    private DeadChessView deadBlueView;
-    private DeadChessView deadRedView;
+
     private PlayerColor currentPlayer;
 
     // Record whether there is a selected piece before
@@ -36,17 +35,15 @@ public class GameController implements GameListener {
 
     private PlayerColor winner;
 
-    public GameController(ChessboardView view,DeadChessView deadRedView,DeadChessView deadBlueView,Chessboard model) {
+    public GameController(ChessboardView view,Chessboard model) {
         this.view = view;
         this.model = model;
-        this.deadRedView =deadRedView;
-        this.deadBlueView = deadBlueView;
+
         this.currentPlayer = PlayerColor.BLUE;
         this.steps = model.getSteps();
         this.winner = null;
         view.registerController(this);
-        deadRedView.registerController(this);
-        deadBlueView.registerController(this);
+
         initialize();
         view.initiateChessComponent(model);
         view.repaint();
@@ -79,10 +76,14 @@ public class GameController implements GameListener {
         if (selectedPoint != null && model.isValidMove(selectedPoint, point)) {
             //System.out.println(model.getChessPieceAt(selectedPoint).getRank());
             model.moveChessPiece(selectedPoint, point);
+
             //为什么有返回值之后就可以了？？？？草 太难绷了 re:好了，虽然不知道怎么好的
             //System.out.println(a);
             //System.out.println(model.getChessPieceAt(point).getRank());
             view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));
+            removeLastMove();
+            setLastMove(point);
+            setLastMove(selectedPoint);
             selectedPoint = null;
             swapColor();
             removeCanMove();
@@ -127,15 +128,15 @@ public class GameController implements GameListener {
                 model.captureChessPiece(selectedPoint, point);
                 view.removeChessComponentAtGrid(point);
                 view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));
-                deadBlueView.initiateGrid();
-                deadRedView.initiateGrid();
-                deadRedView.addDeadChess();
-                deadBlueView.addDeadChess();
+                removeLastMove();
+                setLastMove(point);
+                setLastMove(selectedPoint);
+
                 selectedPoint = null;
                 swapColor();
                 String text = String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString());
                 view.statusLabel.setText(text);
-                deadPic();
+
                 view.repaint();
                 winner = checkWin();
                 if (win()) {
@@ -152,28 +153,25 @@ public class GameController implements GameListener {
     public void reSet() {
         //烦死了烦死了烦死了这个破架构怎么看不懂 解决了，但是还是没看懂，算了能用就行
         this.currentPlayer = PlayerColor.BLUE;
+
         model.initBoard();
         model.initDead();
+        this.steps = model.steps;
         view.removeChessComponent();
-        deadRedView.removeGird();
-        deadRedView.removeGird();
+
 //        deadBlueView.removeGird();
         //view.gridComponents = new CellView[9][7];
         view.initiateChessComponent(model);
         removeCanMove();
+        removeLastMove();
 
-        deadBlueView.initiateGrid();
-        deadRedView.initiateGrid();
-
-
-        deadRedView.repaint();
-        deadRedView.revalidate();
         //view.initiateGridComponents();
         view.repaint();
         view.revalidate();
         selectedPoint = null;
-        this.steps = model.steps;
+
         view.statusLabel.setText("Turn 1 : BLUE");
+        System.out.println(model.getRedDead().size());
     }
 
     public void save(String fileName) throws IOException {
@@ -359,15 +357,18 @@ public class GameController implements GameListener {
                 model.moveChessPiece(src, dest);
                 //System.out.println(1);
                 view.setChessComponentAtGrid(dest, view.removeChessComponentAtGrid(src));
+                removeLastMove();
+                setLastMove(dest);
+                setLastMove(src);
             } else {
                 model.captureChessPiece(src, dest);
                 //System.out.println(2);
                 view.removeChessComponentAtGrid(dest);
                 view.setChessComponentAtGrid(dest, view.removeChessComponentAtGrid(src));
-                deadBlueView.initiateGrid();
-                deadRedView.initiateGrid();
-                deadRedView.addDeadChess();
-                deadBlueView.addDeadChess();
+                removeLastMove();
+                setLastMove(dest);
+                setLastMove(src);
+
             }
         }
         view.repaint();
@@ -395,19 +396,21 @@ public class GameController implements GameListener {
                 model.moveChessPiece(newSteps.get(i).getSrc(), newSteps.get(i).getDest());
                 view.setChessComponentAtGrid(newSteps.get(i).getDest(),
                         view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
+                removeLastMove();
+                setLastMove(newSteps.get(i).getSrc());
+                setLastMove(newSteps.get(i).getDest());
                 swapColor();
-                deadBlueView.initiateGrid();
-                deadRedView.initiateGrid();
+
                 view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
             } else {
                 model.captureChessPiece(newSteps.get(i).getSrc(), newSteps.get(i).getDest());
                 view.removeChessComponentAtGrid(newSteps.get(i).getDest());
                 view.setChessComponentAtGrid(newSteps.get(i).getDest(),
                         view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
-                deadBlueView.initiateGrid();
-                deadRedView.initiateGrid();
-                deadRedView.addDeadChess();
-                deadBlueView.addDeadChess();
+                removeLastMove();
+                setLastMove(newSteps.get(i).getSrc());
+                setLastMove(newSteps.get(i).getDest());
+
                 swapColor();
                 view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
             }
@@ -417,52 +420,52 @@ public class GameController implements GameListener {
     }
 
     //TODO:更美观的方式显示被吃的棋子，但是想不明白怎么写 re：javaswing是傻逼
-    public void deadPic() {
-        for (int i = 0; i < model.getRedDead().size(); i++) {
-            ImageIcon icon;
-            System.out.println("1");
-            if (model.getRedDead().get(i).getName().equals("Elephant")) {
-                Image image = new ImageIcon("chess/red/Elephant.jpg").getImage();
-                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-                icon = new ImageIcon(image);
-                System.out.println("e");
-                //TODO:路径错了，记得改
-            } else if (model.getRedDead().get(i).getName().equals("Lion")) {
-                Image image = new ImageIcon("resource/chess/red/Lion.jpg").getImage();
-                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-                icon = new ImageIcon(image);
-                System.out.println("l");
-            } else if (model.getRedDead().get(i).getName().equals("Tiger")) {
-                Image image = new ImageIcon("resource/chess/red/Tiger.jpg").getImage();
-                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-                icon = new ImageIcon(image);
-            } else if (model.getRedDead().get(i).getName().equals("Leopard")) {
-                Image image = new ImageIcon("resource/chess/red/Leopard.jpg").getImage();
-                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-                icon = new ImageIcon(image);
-            } else if (model.getRedDead().get(i).getName().equals("Wolf")) {
-                Image image = new ImageIcon("resource/chess/red/Wolf.jpg").getImage();
-                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-                icon = new ImageIcon(image);
-            } else if (model.getRedDead().get(i).getName().equals("Dog")) {
-                Image image = new ImageIcon("resource/chess/red/Dog.jpg").getImage();
-                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-                icon = new ImageIcon(image);
-            } else if (model.getRedDead().get(i).getName().equals("Cat")) {
-                Image image = new ImageIcon("resource/chess/red/Cat.jpg").getImage();
-                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-                icon = new ImageIcon(image);
-            } else {
-                Image image = new ImageIcon("resource/chess/red/Rat.jpg").getImage();
-                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-                icon = new ImageIcon(image);
-            }
-            JLabel label = new JLabel();
-            label.setIcon(icon);
-            label.setLocation(600, 400);
-            view.gameFrame.mainFrame.add(label);
-        }
-    }
+//    public void deadPic() {
+//        for (int i = 0; i < model.getRedDead().size(); i++) {
+//            ImageIcon icon;
+//            System.out.println("1");
+//            if (model.getRedDead().get(i).getName().equals("Elephant")) {
+//                Image image = new ImageIcon("chess/red/Elephant.jpg").getImage();
+//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
+//                icon = new ImageIcon(image);
+//                System.out.println("e");
+//                //TODO:路径错了，记得改
+//            } else if (model.getRedDead().get(i).getName().equals("Lion")) {
+//                Image image = new ImageIcon("resource/chess/red/Lion.jpg").getImage();
+//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
+//                icon = new ImageIcon(image);
+//                System.out.println("l");
+//            } else if (model.getRedDead().get(i).getName().equals("Tiger")) {
+//                Image image = new ImageIcon("resource/chess/red/Tiger.jpg").getImage();
+//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
+//                icon = new ImageIcon(image);
+//            } else if (model.getRedDead().get(i).getName().equals("Leopard")) {
+//                Image image = new ImageIcon("resource/chess/red/Leopard.jpg").getImage();
+//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
+//                icon = new ImageIcon(image);
+//            } else if (model.getRedDead().get(i).getName().equals("Wolf")) {
+//                Image image = new ImageIcon("resource/chess/red/Wolf.jpg").getImage();
+//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
+//                icon = new ImageIcon(image);
+//            } else if (model.getRedDead().get(i).getName().equals("Dog")) {
+//                Image image = new ImageIcon("resource/chess/red/Dog.jpg").getImage();
+//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
+//                icon = new ImageIcon(image);
+//            } else if (model.getRedDead().get(i).getName().equals("Cat")) {
+//                Image image = new ImageIcon("resource/chess/red/Cat.jpg").getImage();
+//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
+//                icon = new ImageIcon(image);
+//            } else {
+//                Image image = new ImageIcon("resource/chess/red/Rat.jpg").getImage();
+//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
+//                icon = new ImageIcon(image);
+//            }
+//            JLabel label = new JLabel();
+//            label.setIcon(icon);
+//            label.setLocation(600, 400);
+//            view.gameFrame.mainFrame.add(label);
+//        }
+//    }
     public void playBack(){
         ArrayList<Step> newSteps = new ArrayList<>();
         if (steps.size() == 0) {
@@ -495,6 +498,9 @@ public class GameController implements GameListener {
                         model.moveChessPiece(newSteps.get(i).getSrc(), newSteps.get(i).getDest());
                         view.setChessComponentAtGrid(newSteps.get(i).getDest(),
                                 view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
+                        removeLastMove();
+                        setLastMove(newSteps.get(i).getSrc());
+                        setLastMove(newSteps.get(i).getDest());
                         swapColor();
                         view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
                         view.repaint();
@@ -504,10 +510,10 @@ public class GameController implements GameListener {
                         view.removeChessComponentAtGrid(newSteps.get(i).getDest());
                         view.setChessComponentAtGrid(newSteps.get(i).getDest(),
                                 view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
-                        deadBlueView.initiateGrid();
-                        deadRedView.initiateGrid();
-                        deadRedView.addDeadChess();
-                        deadBlueView.addDeadChess();
+
+                        removeLastMove();
+                        setLastMove(newSteps.get(i).getSrc());
+                        setLastMove(newSteps.get(i).getDest());
                         swapColor();
                         view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
                         view.repaint();
@@ -526,17 +532,30 @@ public class GameController implements GameListener {
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 7; j++) {
                 ChessboardPoint dest = new ChessboardPoint(i, j);
-                if (model.isValidMove(point, dest) || model.isValidCapture(point, dest)) {
+                if (model.getChessPieceAt(dest) == null && model.isValidMove(point, dest)) {
+                    view.gridComponents[i][j].setCanMove(true);
+                }else if(model.isValidCapture(point,dest)){
                     view.gridComponents[i][j].setCanMove(true);
                 }
             }
         }
+    }
+    private void setLastMove(ChessboardPoint point){
+        view.getGridComponentAt(point).setLastMove(true);
     }
 
     private void removeCanMove() {
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 7; j++) {
                 view.gridComponents[i][j].setCanMove(false);
+            }
+        }
+    }
+
+    private void removeLastMove(){
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 7; j++) {
+                view.gridComponents[i][j].setLastMove(false);
             }
         }
     }

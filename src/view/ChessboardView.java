@@ -185,7 +185,7 @@ public class ChessboardView extends JComponent {
         return chess;
     }
 
-    private CellView getGridComponentAt(ChessboardPoint point) {
+    public CellView getGridComponentAt(ChessboardPoint point) {
         return gridComponents[point.getRow()][point.getCol()];
     }
 
@@ -234,4 +234,5 @@ public class ChessboardView extends JComponent {
             ex.printStackTrace();
         }
     }
+
 }

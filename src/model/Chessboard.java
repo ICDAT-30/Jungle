@@ -167,16 +167,14 @@ public class Chessboard {
 
     public boolean isValidMove(ChessboardPoint src, ChessboardPoint dest) {
 
-        if (getChessPieceAt(src) == null ) {
+        if (getChessPieceAt(src) == null) {
             return false;
         }
-        if (getGridAt(dest).getType()!=null){
-            if (getChessPieceAt(src).getOwner().equals(PlayerColor.RED)){
-                getGridAt(dest).getType().equals(CellType.RED_DEN);
-                return false;
-            }else{
-                getGridAt(dest).getType().equals(CellType.BLUE_DEN);
-                return false;
+        if (getGridAt(dest).getType() != null) {
+            if (getChessPieceAt(src).getOwner().equals(PlayerColor.RED)) {
+                if (getGridAt(dest).getType().equals(CellType.RED_DEN)) return false;
+            } else {
+                if (getGridAt(dest).getType().equals(CellType.BLUE_DEN)) return false;
             }
         }
 
@@ -239,7 +237,7 @@ public class Chessboard {
 
 
     public boolean isValidCapture(ChessboardPoint src, ChessboardPoint dest) {
-        if (getChessPieceAt(src) != null | getChessPieceAt(dest) != null) {
+        if (getChessPieceAt(src) != null & getChessPieceAt(dest) != null) {
             if (getChessPieceOwner(src) != getChessPieceOwner(dest))
                 return getChessPieceAt(src).canCapture(getChessPieceAt(dest)) && isValidMove(src, dest);
         }

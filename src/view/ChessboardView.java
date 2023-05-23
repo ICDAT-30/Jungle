@@ -5,9 +5,13 @@ import controller.GameController;
 import model.*;
 import view.chessView.*;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -56,7 +60,6 @@ public class ChessboardView extends JComponent {
         Cell[][] grid = chessboard.getGrid();
         for (int i = 0; i < CHESSBOARD_ROW_SIZE.getNum(); i++) {
             for (int j = 0; j < CHESSBOARD_COL_SIZE.getNum(); j++) {
-                // TODO: Implement the initialization checkerboard
                 if (grid[i][j].getPiece() != null) {
                     ChessPiece chessPiece = grid[i][j].getPiece();
                     System.out.println(chessPiece.getOwner());
@@ -205,6 +208,7 @@ public class ChessboardView extends JComponent {
     protected void processMouseEvent(MouseEvent e) {
         if (e.getID() == MouseEvent.MOUSE_PRESSED) {
             JComponent clickedComponent = (JComponent) getComponentAt(e.getX(), e.getY());
+            playEffect("bgm\\click.wav");
             if (clickedComponent.getComponentCount() == 0) {
                 System.out.print("None chess here and ");
                 gameController.onPlayerClickCell(getChessboardPoint(e.getPoint()), (CellView) clickedComponent);
@@ -212,6 +216,22 @@ public class ChessboardView extends JComponent {
                 System.out.print("One chess here and ");
                 gameController.onPlayerClickChessPiece(getChessboardPoint(e.getPoint()), (AnimalChessComponent) clickedComponent.getComponents()[0]);
             }
+        }
+    }
+    public static void playEffect(String musicLocation) {
+        try {
+            File musicPath = new File(musicLocation);
+
+            if (musicPath.exists()) {
+                AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioInput);
+                clip.start();
+                clip.loop(0);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }

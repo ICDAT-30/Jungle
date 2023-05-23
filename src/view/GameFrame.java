@@ -73,6 +73,7 @@ public class GameFrame extends JFrame {
         addSaveButton();
         addLoadButton();
         addRegretButton();
+        addPBButton();
         addReturnButton();
         addBGButton();
         add(chessboard);
@@ -135,7 +136,7 @@ public class GameFrame extends JFrame {
                 revalidate();
             }
         });
-        button.setLocation(HEIGHT + 200, HEIGHT / 10 - 40);
+        button.setLocation(HEIGHT + 200, HEIGHT / 10);
         button.setSize(200, 60);
         button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
         add(button);
@@ -146,12 +147,12 @@ public class GameFrame extends JFrame {
         button.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO
+                //1TODO re:这为什么打了个todo？删了
                 chessboardView.gameController.reSet();
                 chessboardView.repaint();
             }
         });
-        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 80);
+        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 100);
         button.setSize(200, 60);
         button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
         add(button);
@@ -205,11 +206,26 @@ public class GameFrame extends JFrame {
                 chessboardView.gameController.regret();
             }
         });
-        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 400);
+        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 380);
         button.setSize(200, 60);
         button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
         add(button);
     }
+
+    private void addPBButton() {
+        JButton button = new JButton("Play Back");
+        button.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chessboardView.gameController.playBack();
+            }
+        });
+        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 460);
+        button.setSize(200, 60);
+        button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        add(button);
+    }
+
 
     private void addReturnButton() {
         JButton button = new JButton("Return");
@@ -218,9 +234,10 @@ public class GameFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 mainFrame.setVisible(true);
+                chessboardView.gameController.reSet();
             }
         });
-        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 520);
+        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 560);
         button.setSize(200, 60);
         button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
         add(button);

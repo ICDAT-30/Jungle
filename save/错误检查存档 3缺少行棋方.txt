@@ -1,0 +1,15 @@
+4
+BLUE Leopard 6 4 6 3 null
+RED Wolf 2 4 2 3 null
+BLUE Rat 6 6 5 6 null
+RED Elephant 2 6 3 6 null
+
+Lion null null null null null Tiger 
+null Dog null null null Cat null 
+Rat null Leopard Wolf null null null 
+null null null null null null Elephant 
+null null null null null null null 
+null null null null null null Rat 
+Elephant null Wolf Leopard null null null 
+null Cat null null null Dog null 
+Tiger null null null null null Lion 

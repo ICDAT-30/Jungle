@@ -57,7 +57,7 @@ public class MainFrame extends JFrame {
         });
         button.setLocation(WIDTH/2-100, HEIGHT / 10 +440);
         button.setSize(200, 60);
-        button.setFont(new Font("Showcard Gothic", Font.BOLD, 40));
+        button.setFont(new Font("Showcard Gothic", Font.BOLD,40));
         button.setContentAreaFilled(false);
         button.setBorderPainted(false);
         add(button);

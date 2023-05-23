@@ -38,9 +38,9 @@ public class DogChessComponent extends AnimalChessComponent {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        ImageIcon pic = new ImageIcon("chess\\red\\Dog.jpg");
+        ImageIcon pic = new ImageIcon("chess/red/Dog.jpg");
         if (owner == PlayerColor.BLUE){
-            pic = new ImageIcon("chess\\blue\\Dog.jpg");
+            pic = new ImageIcon("chess/blue/Dog.jpg");
         }
         Image image = pic.getImage();
         pic = new ImageIcon(image.getScaledInstance(getWidth(), getHeight(),Image.SCALE_SMOOTH));

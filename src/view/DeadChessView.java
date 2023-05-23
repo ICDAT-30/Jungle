@@ -28,6 +28,8 @@ public class DeadChessView extends JComponent {
         setSize(width, height);
         System.out.printf("chessboard width, height = [%d : %d], chess size = %d\n", width, height, CHESS_SIZE);
         this.deadGrid= new CellView[4][2];
+
+
     }
 
 }

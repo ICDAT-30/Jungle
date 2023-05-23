@@ -24,7 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class GameController implements GameListener {
 
 
-    private Chessboard model;
+    public Chessboard model;
     private ChessboardView view;
     private PlayerColor currentPlayer;
 

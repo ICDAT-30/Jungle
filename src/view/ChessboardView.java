@@ -62,7 +62,7 @@ public class ChessboardView extends JComponent {
             for (int j = 0; j < CHESSBOARD_COL_SIZE.getNum(); j++) {
                 if (grid[i][j].getPiece() != null) {
                     ChessPiece chessPiece = grid[i][j].getPiece();
-                    System.out.println(chessPiece.getOwner());
+                    //System.out.println(chessPiece.getOwner());
                     if(chessPiece.getName().equals("Elephant")){
                         gridComponents[i][j].add(
                                 new ElephantChessComponent(

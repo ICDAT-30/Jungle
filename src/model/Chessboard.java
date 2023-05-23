@@ -88,6 +88,24 @@ public class Chessboard {
         grid[6][6].setPiece(new ChessPiece(PlayerColor.BLUE, "Rat", 1));
     }
 
+    public void initDead(){
+        int size = blueDead.size();
+        System.out.println("__");
+        System.out.println(size);
+        System.out.println("__");
+        for (int i = 0; i < size; i++) {
+            this.blueDead.remove(0);
+            System.out.println("#");
+        }
+        size = redDead.size();
+        System.out.println("__");
+        System.out.println(size);
+        System.out.println("__");
+        for (int i = 0; i < size; i++) {
+            this.redDead.remove(0);
+            System.out.println("$");
+        }
+    }
     //记得改private re：没啥可改的，写着写着就会发现还是public好
     public ChessPiece getChessPieceAt(ChessboardPoint point) {
         return getGridAt(point).getPiece();

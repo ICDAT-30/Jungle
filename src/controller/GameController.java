@@ -4,6 +4,7 @@ package controller;
 import listener.GameListener;
 import model.*;
 import view.CellView;
+import view.DeadChessView;
 import view.chessView.*;
 import view.ChessboardView;
 
@@ -11,9 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Controller is the connection between model and view,
@@ -26,6 +25,8 @@ public class GameController implements GameListener {
 
     public Chessboard model;
     private ChessboardView view;
+    private DeadChessView deadBlueView;
+    private DeadChessView deadRedView;
     private PlayerColor currentPlayer;
 
     // Record whether there is a selected piece before
@@ -35,13 +36,17 @@ public class GameController implements GameListener {
 
     private PlayerColor winner;
 
-    public GameController(ChessboardView view, Chessboard model) {
+    public GameController(ChessboardView view,DeadChessView deadRedView,DeadChessView deadBlueView,Chessboard model) {
         this.view = view;
         this.model = model;
+        this.deadRedView =deadRedView;
+        this.deadBlueView = deadBlueView;
         this.currentPlayer = PlayerColor.BLUE;
         this.steps = model.getSteps();
         this.winner = null;
         view.registerController(this);
+        deadRedView.registerController(this);
+        deadBlueView.registerController(this);
         initialize();
         view.initiateChessComponent(model);
         view.repaint();
@@ -122,6 +127,10 @@ public class GameController implements GameListener {
                 model.captureChessPiece(selectedPoint, point);
                 view.removeChessComponentAtGrid(point);
                 view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));
+                deadBlueView.initiateGrid();
+                deadRedView.initiateGrid();
+                deadRedView.addDeadChess();
+                deadBlueView.addDeadChess();
                 selectedPoint = null;
                 swapColor();
                 String text = String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString());
@@ -144,10 +153,21 @@ public class GameController implements GameListener {
         //烦死了烦死了烦死了这个破架构怎么看不懂 解决了，但是还是没看懂，算了能用就行
         this.currentPlayer = PlayerColor.BLUE;
         model.initBoard();
+        model.initDead();
         view.removeChessComponent();
+        deadRedView.removeGird();
+        deadRedView.removeGird();
+//        deadBlueView.removeGird();
         //view.gridComponents = new CellView[9][7];
         view.initiateChessComponent(model);
         removeCanMove();
+
+        deadBlueView.initiateGrid();
+        deadRedView.initiateGrid();
+
+
+        deadRedView.repaint();
+        deadRedView.revalidate();
         //view.initiateGridComponents();
         view.repaint();
         view.revalidate();
@@ -196,7 +216,7 @@ public class GameController implements GameListener {
         System.out.println("Save Done");
     }
 
-    public void Load() throws IOException {
+    public void load() throws IOException {
         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new File("save"));
         chooser.showOpenDialog(view);
@@ -344,6 +364,10 @@ public class GameController implements GameListener {
                 //System.out.println(2);
                 view.removeChessComponentAtGrid(dest);
                 view.setChessComponentAtGrid(dest, view.removeChessComponentAtGrid(src));
+                deadBlueView.initiateGrid();
+                deadRedView.initiateGrid();
+                deadRedView.addDeadChess();
+                deadBlueView.addDeadChess();
             }
         }
         view.repaint();
@@ -372,12 +396,18 @@ public class GameController implements GameListener {
                 view.setChessComponentAtGrid(newSteps.get(i).getDest(),
                         view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
                 swapColor();
+                deadBlueView.initiateGrid();
+                deadRedView.initiateGrid();
                 view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
             } else {
                 model.captureChessPiece(newSteps.get(i).getSrc(), newSteps.get(i).getDest());
                 view.removeChessComponentAtGrid(newSteps.get(i).getDest());
                 view.setChessComponentAtGrid(newSteps.get(i).getDest(),
                         view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
+                deadBlueView.initiateGrid();
+                deadRedView.initiateGrid();
+                deadRedView.addDeadChess();
+                deadBlueView.addDeadChess();
                 swapColor();
                 view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
             }
@@ -434,26 +464,26 @@ public class GameController implements GameListener {
         }
     }
     public void playBack(){
+        ArrayList<Step> newSteps = new ArrayList<>();
+        if (steps.size() == 0) {
+            JOptionPane.showMessageDialog(null, "还未开始棋局，无法回放棋局！",
+                    "无法回放", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        for (int i = 0; i < steps.size(); i++) {
+            if (steps.get(i).getCapturedPiece() == null) {
+                newSteps.add(new Step(steps.get(i).getSrc(), steps.get(i).getDest(), steps.get(i).getPiece()));
+            } else {
+                newSteps.add(new Step(steps.get(i).getSrc(), steps.get(i).getDest(),
+                        steps.get(i).getPiece(), steps.get(i).getCapturedPiece()));
+            }
+        }
+        reSet();
+        view.repaint();
+        view.revalidate();
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                ArrayList<Step> newSteps = new ArrayList<>();
-                if (steps.size() == 0) {
-                    JOptionPane.showMessageDialog(null, "还未开始棋局，无法回放棋局！",
-                            "无法回放", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                for (int i = 0; i < steps.size(); i++) {
-                    if (steps.get(i).getCapturedPiece() == null) {
-                        newSteps.add(new Step(steps.get(i).getSrc(), steps.get(i).getDest(), steps.get(i).getPiece()));
-                    } else {
-                        newSteps.add(new Step(steps.get(i).getSrc(), steps.get(i).getDest(),
-                                steps.get(i).getPiece(), steps.get(i).getCapturedPiece()));
-                    }
-                }
-                reSet();
-                view.repaint();
-                view.revalidate();
                 for (int i = 0; i < newSteps.size(); i++) {
                     try {
                             Thread.sleep(500);
@@ -474,6 +504,10 @@ public class GameController implements GameListener {
                         view.removeChessComponentAtGrid(newSteps.get(i).getDest());
                         view.setChessComponentAtGrid(newSteps.get(i).getDest(),
                                 view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
+                        deadBlueView.initiateGrid();
+                        deadRedView.initiateGrid();
+                        deadRedView.addDeadChess();
+                        deadBlueView.addDeadChess();
                         swapColor();
                         view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
                         view.repaint();

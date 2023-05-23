@@ -208,7 +208,7 @@ public class ChessboardView extends JComponent {
     protected void processMouseEvent(MouseEvent e) {
         if (e.getID() == MouseEvent.MOUSE_PRESSED) {
             JComponent clickedComponent = (JComponent) getComponentAt(e.getX(), e.getY());
-            playEffect("bgm\\click.wav");
+            playEffect("bgm/click.wav");
             if (clickedComponent.getComponentCount() == 0) {
                 System.out.print("None chess here and ");
                 gameController.onPlayerClickCell(getChessboardPoint(e.getPoint()), (CellView) clickedComponent);

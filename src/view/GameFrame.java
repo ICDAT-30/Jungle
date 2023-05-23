@@ -1,5 +1,7 @@
 package view;
 
+import model.PlayerColor;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -19,8 +21,8 @@ public class GameFrame extends JFrame {
     JLabel background;
     JLabel chessboard;
     private ChessboardView chessboardView;
-    private DeadChessView redDead;
-    private DeadChessView blueDead;
+    public DeadChessView redDead;
+    public DeadChessView blueDead;
     public MainFrame mainFrame;
     public final JLabel bg1;
     public final JLabel bg2;
@@ -103,17 +105,22 @@ public class GameFrame extends JFrame {
     }
 
     private void addDeadChess(){
-        redDead =new DeadChessView(ONE_CHESS_SIZE,Color.RED,chessboardView.gameController,
-                this);
+        redDead =new DeadChessView(ONE_CHESS_SIZE, PlayerColor.RED,chessboardView.gameController, this);
         redDead.setLocation(HEIGHT - 40,HEIGHT / 10);
+
         add(redDead);
+
+        blueDead =new DeadChessView(ONE_CHESS_SIZE,PlayerColor.BLUE,chessboardView.gameController,this);
+        blueDead.setLocation(HEIGHT - 40,HEIGHT / 10+ONE_CHESS_SIZE*5);
+
+        add(blueDead);
     }
     /**
      * 在游戏面板中添加标签
      */
     private void addStatusLabel() {
         statusLabel = new JLabel("Turn 1 : BLUE");
-        statusLabel.setLocation(HEIGHT - 100, HEIGHT / 10 - 40);
+        statusLabel.setLocation(HEIGHT - 500, HEIGHT / 10 - 60);
         statusLabel.setSize(280, 60);
         statusLabel.setFont(new Font("Showcard Gothic", Font.PLAIN, 35));
         add(statusLabel);
@@ -195,7 +202,7 @@ public class GameFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    chessboardView.gameController.Load();
+                    chessboardView.gameController.load();
 
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);

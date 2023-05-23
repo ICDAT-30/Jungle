@@ -4,6 +4,7 @@ import controller.GameController;
 import model.ChessPiece;
 import model.Chessboard;
 import model.ChessboardPoint;
+import model.PlayerColor;
 import view.chessView.*;
 
 import javax.swing.*;
@@ -14,13 +15,12 @@ public class DeadChessView extends JComponent {
     private final int CHESS_SIZE;
 
     private GameController gameController;
-    private Chessboard chessboard;
     private GameFrame gameFrame;
 
-    private Color color;
+    private PlayerColor color;
 
 
-    public DeadChessView(int chessSize, Color color, GameController gameController, GameFrame gameFrame) {
+    public DeadChessView(int chessSize, PlayerColor color, GameController gameController, GameFrame gameFrame) {
         this.color = color;
         this.gameController = gameController;
         this.gameFrame = gameFrame;
@@ -35,9 +35,9 @@ public class DeadChessView extends JComponent {
     }
 
     public void addDeadChess() {
-        if (this.color.equals(Color.red)) {
-            for (int i = 0; i < chessboard.getRedDead().size(); i++) {
-                ChessPiece chessPiece = chessboard.getRedDead().get(i);
+        if (this.color.equals(PlayerColor.RED)) {
+            for (int i = 0; i < gameController.model.getRedDead().size(); i++) {
+                ChessPiece chessPiece = gameController.model.getRedDead().get(i);
                 int y = i > 3 ? 1 : 0;
                 int x = i > 3 ? i - 4 : i;
                 if (chessPiece.getName().equals("Elephant")) {
@@ -83,8 +83,8 @@ public class DeadChessView extends JComponent {
                 }
             }
         }else {
-            for (int i = 0; i < chessboard.getBlueDead().size(); i++) {
-                ChessPiece chessPiece = chessboard.getBlueDead().get(i);
+            for (int i = 0; i < gameController.model.getBlueDead().size(); i++) {
+                ChessPiece chessPiece = gameController.model.getBlueDead().get(i);
                 int y = i > 3 ? 1 : 0;
                 int x = i > 3 ? i - 4 : i;
                 if (chessPiece.getName().equals("Elephant")) {
@@ -135,12 +135,33 @@ public class DeadChessView extends JComponent {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 2; j++) {
                 CellView cell;
-                cell = new CellView(new Color(0,0,100,255), calculatePoint(i, j), CHESS_SIZE);
+                cell = new CellView(new Color(200,0,0,0), calculatePoint(i, j), CHESS_SIZE);
+                deadGrid[i][j] = cell;
                 this.add(cell);
+                //deadGrid[i][j].repaint();
+                //deadGrid[i][j].revalidate();
+            }
+        }
+    }
+
+    public void removeGird(){
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 2; j++) {
+                try {
+                    deadGrid[i][j].removeAll();
+                    //deadGrid[i][j].remove(0);
+//                    deadGrid[i][j].repaint();
+                    deadGrid[i][j].revalidate();
+                }catch (Exception e){
+
+                }
             }
         }
     }
     private Point calculatePoint(int row, int col) {
         return new Point(col * CHESS_SIZE, row * CHESS_SIZE);
+    }
+    public void registerController(GameController gameController) {
+        this.gameController = gameController;
     }
 }

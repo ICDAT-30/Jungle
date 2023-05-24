@@ -9,10 +9,10 @@ import view.chessView.*;
 import view.ChessboardView;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Controller is the connection between model and view,
@@ -22,10 +22,11 @@ import java.util.List;
  */
 public class GameController implements GameListener {
 
-
     public Chessboard model;
-    private ChessboardView view;
-
+    public ChessboardView view;
+    private boolean timerOpen ;
+    public static Thread timer;
+    public int time;
     private PlayerColor currentPlayer;
 
     // Record whether there is a selected piece before
@@ -42,17 +43,36 @@ public class GameController implements GameListener {
         this.currentPlayer = PlayerColor.BLUE;
         this.steps = model.getSteps();
         this.winner = null;
+        this.time = 0;
         view.registerController(this);
 
+        timer= new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    if (timerOpen){
+                        time+=1;
+                        view.timeLabel.setText(String.valueOf(time)+"s");
+                    }
+                }
+            }
+        });
+        timer.start();
         initialize();
         view.initiateChessComponent(model);
         view.repaint();
+
     }
 
     private void initialize() {
         for (int i = 0; i < Constant.CHESSBOARD_ROW_SIZE.getNum(); i++) {
             for (int j = 0; j < Constant.CHESSBOARD_COL_SIZE.getNum(); j++) {
-//这是在干嘛？先打个todo re：到要结束了也没明白，不管了
+                //这是在干嘛？先打个todo re：到要结束了也没明白，不管了
             }
         }
     }
@@ -94,7 +114,9 @@ public class GameController implements GameListener {
             winner = checkWin();
             if (win()) {
                 JOptionPane.showMessageDialog(null, winner.toString() + " is win!");
-                reSet();
+                reset();
+                this.time = 0;
+                openTimer();
                 return;
             }
             // if the chess enter Dens or Traps and so on 好像全写到move里了？不确定，再看看
@@ -123,25 +145,26 @@ public class GameController implements GameListener {
             view.repaint();
             view.revalidate();
         } else {
-            removeCanMove();
             if (model.isValidCapture(selectedPoint, point)) {
+                removeCanMove();
                 model.captureChessPiece(selectedPoint, point);
                 view.removeChessComponentAtGrid(point);
                 view.setChessComponentAtGrid(point, view.removeChessComponentAtGrid(selectedPoint));
                 removeLastMove();
                 setLastMove(point);
                 setLastMove(selectedPoint);
-
                 selectedPoint = null;
                 swapColor();
                 String text = String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString());
                 view.statusLabel.setText(text);
-
                 view.repaint();
+                view.gameFrame.changeCapturedView();
                 winner = checkWin();
                 if (win()) {
                     JOptionPane.showMessageDialog(null, winner.toString() + " is win!");
-                    reSet();
+                    reset();
+                    this.time = 0;
+                    openTimer();
                     return;
                 }
             }
@@ -150,28 +173,24 @@ public class GameController implements GameListener {
         }
     }
 
-    public void reSet() {
-        //烦死了烦死了烦死了这个破架构怎么看不懂 解决了，但是还是没看懂，算了能用就行
-        this.currentPlayer = PlayerColor.BLUE;
-
+    public void reset() {
+        closeTimer();
+        //烦死了烦死了烦死了这个破架构怎么看不懂 re:解决了，但是还是没看懂，算了能用就行
         model.initBoard();
         model.initDead();
-        this.steps = model.steps;
-        view.removeChessComponent();
 
-//        deadBlueView.removeGird();
-        //view.gridComponents = new CellView[9][7];
-        view.initiateChessComponent(model);
         removeCanMove();
         removeLastMove();
-
-        //view.initiateGridComponents();
+        view.removeChessComponent();
+        view.initiateChessComponent(model);
+        view.statusLabel.setText("Turn 1 : BLUE");
+        view.gameFrame.removeCapturedView();
         view.repaint();
         view.revalidate();
-        selectedPoint = null;
 
-        view.statusLabel.setText("Turn 1 : BLUE");
-        System.out.println(model.getRedDead().size());
+        this.currentPlayer = PlayerColor.BLUE;
+        this.steps = model.steps;
+        selectedPoint = null;
     }
 
     public void save(String fileName) throws IOException {
@@ -201,6 +220,8 @@ public class GameController implements GameListener {
             fileWriter.write(steps.get(i).toString());
             fileWriter.write("\n");
         }
+        //储存time
+        fileWriter.write(String.valueOf(time));
         fileWriter.write("\n");
         //储存棋盘
         for (int i = 0; i < 9; i++) {
@@ -212,9 +233,11 @@ public class GameController implements GameListener {
         }
         fileWriter.close();
         System.out.println("Save Done");
+
     }
 
     public void load() throws IOException {
+        closeTimer();
         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new File("save"));
         chooser.showOpenDialog(view);
@@ -223,6 +246,8 @@ public class GameController implements GameListener {
         if (!file.getName().endsWith(".txt")) {
             JOptionPane.showMessageDialog(null, "文件扩展名错误\n请重新选择",
                     "文件扩展名错误", JOptionPane.ERROR_MESSAGE);
+            openTimer();
+
             return;
         }
         ArrayList<String> readList = new ArrayList<>();
@@ -242,6 +267,8 @@ public class GameController implements GameListener {
         if ((!player.equals("RED")) & !(player.equals("BLUE"))) {
             JOptionPane.showMessageDialog(null, "缺少行棋方\n请重新选择",
                     "缺少行棋方", JOptionPane.ERROR_MESSAGE);
+            openTimer();
+
             return;
         }
         String[][] steps = new String[step][];
@@ -262,8 +289,14 @@ public class GameController implements GameListener {
         if (steps[step - 1][0].equals(player) | !isPlayer) {
             JOptionPane.showMessageDialog(null, "行棋方错误\n请重新选择",
                     "行棋方错误", JOptionPane.ERROR_MESSAGE);
+            openTimer();
+
             return;
         }
+        //读取时间
+        int time = Integer.parseInt(readList.get(readList.size()-10));
+        System.out.println(time);
+
         //读取棋盘
         String[][] board = new String[9][];
         for (int i = readList.size() - 9; i < readList.size(); i++) {
@@ -278,6 +311,8 @@ public class GameController implements GameListener {
             if (board[i].length != 7) {
                 JOptionPane.showMessageDialog(null, "棋盘大小错误\n请重新选择",
                         "棋盘大小错误", JOptionPane.ERROR_MESSAGE);
+                openTimer();
+
                 return;
             }
         }
@@ -294,6 +329,8 @@ public class GameController implements GameListener {
                     (!steps[i][1].equals("Wolf"))){
                 JOptionPane.showMessageDialog(null, "棋子类型错误\n请重新选择",
                         "棋子类型错误", JOptionPane.ERROR_MESSAGE);
+                openTimer();
+
                 return;
             }
                 if (steps[i][6].equals("null")) {
@@ -302,11 +339,15 @@ public class GameController implements GameListener {
                     if (chessTest.getChessPieceAt(src) == null) {
                         JOptionPane.showMessageDialog(null, "棋子位置错误\n请重新选择",
                                 "棋子位置错误", JOptionPane.ERROR_MESSAGE);
+                        openTimer();
+
                         return;
                     }
                     if (!chessTest.isValidMove(src, dest)) {
                         JOptionPane.showMessageDialog(null, "棋子移动错误\n请重新选择",
                                 "棋子移动错误", JOptionPane.ERROR_MESSAGE);
+                        openTimer();
+
                         return;
                     }
                     chessTest.moveChessPiece(src, dest);
@@ -316,11 +357,15 @@ public class GameController implements GameListener {
                     if (chessTest.getChessPieceAt(src) == null | chessTest.getChessPieceAt(dest) == null) {
                         JOptionPane.showMessageDialog(null, "棋子位置错误\n请重新选择",
                                 "棋子位置错误", JOptionPane.ERROR_MESSAGE);
+                       openTimer();
+
                         return;
                     }
                     if (!chessTest.isValidCapture(src, dest)) {
                         JOptionPane.showMessageDialog(null, "棋子移动错误\n请重新选择",
                                 "棋子移动错误", JOptionPane.ERROR_MESSAGE);
+                     openTimer();
+
                         return;
                     }
                     chessTest.captureChessPiece(src, dest);
@@ -342,11 +387,14 @@ public class GameController implements GameListener {
         if (!isPosition) {
             JOptionPane.showMessageDialog(null, "棋子位置错误\n请重新选择",
                     "棋子位置错误", JOptionPane.ERROR_MESSAGE);
+            openTimer();
+
             return;
         }
-        //没有错误开始还原棋盘
 
-        reSet();
+        //没有错误开始还原棋盘
+        reset();
+        this.time = time;
         currentPlayer = player.equals("BLUE") ? PlayerColor.BLUE : PlayerColor.RED;
         view.statusLabel.setText(String.format("Turn %d : %s", (steps.length) / 2 + 1, currentPlayer.toString()));
         //statusLabel没有变化 好像不太对 re:controller的steps和board的steps在初始化之后解耦了
@@ -368,11 +416,13 @@ public class GameController implements GameListener {
                 removeLastMove();
                 setLastMove(dest);
                 setLastMove(src);
-
+                view.gameFrame.changeCapturedView();
             }
         }
         view.repaint();
         view.revalidate();
+        openTimer();
+
     }
 
     public void regret() {
@@ -390,7 +440,8 @@ public class GameController implements GameListener {
                         steps.get(i).getPiece(), steps.get(i).getCapturedPiece()));
             }
         }
-        reSet();
+        int time = this.time;
+        reset();
         for (int i = 0; i < newSteps.size(); i++) {
             if (newSteps.get(i).getCapturedPiece() == null) {
                 model.moveChessPiece(newSteps.get(i).getSrc(), newSteps.get(i).getDest());
@@ -399,8 +450,8 @@ public class GameController implements GameListener {
                 removeLastMove();
                 setLastMove(newSteps.get(i).getSrc());
                 setLastMove(newSteps.get(i).getDest());
-                swapColor();
 
+                swapColor();
                 view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
             } else {
                 model.captureChessPiece(newSteps.get(i).getSrc(), newSteps.get(i).getDest());
@@ -410,62 +461,18 @@ public class GameController implements GameListener {
                 removeLastMove();
                 setLastMove(newSteps.get(i).getSrc());
                 setLastMove(newSteps.get(i).getDest());
-
+                view.gameFrame.changeCapturedView();
                 swapColor();
                 view.statusLabel.setText(String.format("Turn %d : %s", (steps.size()) / 2 + 1, currentPlayer.toString()));
             }
         }
+        this.time = time;
+        openTimer();
+
         view.repaint();
         view.revalidate();
     }
 
-    //TODO:更美观的方式显示被吃的棋子，但是想不明白怎么写 re：javaswing是傻逼
-//    public void deadPic() {
-//        for (int i = 0; i < model.getRedDead().size(); i++) {
-//            ImageIcon icon;
-//            System.out.println("1");
-//            if (model.getRedDead().get(i).getName().equals("Elephant")) {
-//                Image image = new ImageIcon("chess/red/Elephant.jpg").getImage();
-//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-//                icon = new ImageIcon(image);
-//                System.out.println("e");
-//                //TODO:路径错了，记得改
-//            } else if (model.getRedDead().get(i).getName().equals("Lion")) {
-//                Image image = new ImageIcon("resource/chess/red/Lion.jpg").getImage();
-//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-//                icon = new ImageIcon(image);
-//                System.out.println("l");
-//            } else if (model.getRedDead().get(i).getName().equals("Tiger")) {
-//                Image image = new ImageIcon("resource/chess/red/Tiger.jpg").getImage();
-//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-//                icon = new ImageIcon(image);
-//            } else if (model.getRedDead().get(i).getName().equals("Leopard")) {
-//                Image image = new ImageIcon("resource/chess/red/Leopard.jpg").getImage();
-//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-//                icon = new ImageIcon(image);
-//            } else if (model.getRedDead().get(i).getName().equals("Wolf")) {
-//                Image image = new ImageIcon("resource/chess/red/Wolf.jpg").getImage();
-//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-//                icon = new ImageIcon(image);
-//            } else if (model.getRedDead().get(i).getName().equals("Dog")) {
-//                Image image = new ImageIcon("resource/chess/red/Dog.jpg").getImage();
-//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-//                icon = new ImageIcon(image);
-//            } else if (model.getRedDead().get(i).getName().equals("Cat")) {
-//                Image image = new ImageIcon("resource/chess/red/Cat.jpg").getImage();
-//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-//                icon = new ImageIcon(image);
-//            } else {
-//                Image image = new ImageIcon("resource/chess/red/Rat.jpg").getImage();
-//                image = image.getScaledInstance(40, 40, Image.SCALE_DEFAULT);
-//                icon = new ImageIcon(image);
-//            }
-//            JLabel label = new JLabel();
-//            label.setIcon(icon);
-//            label.setLocation(600, 400);
-//            view.gameFrame.mainFrame.add(label);
-//        }
-//    }
     public void playBack(){
         ArrayList<Step> newSteps = new ArrayList<>();
         if (steps.size() == 0) {
@@ -481,7 +488,8 @@ public class GameController implements GameListener {
                         steps.get(i).getPiece(), steps.get(i).getCapturedPiece()));
             }
         }
-        reSet();
+        reset();
+      openTimer();
         view.repaint();
         view.revalidate();
         Thread thread = new Thread(new Runnable() {
@@ -510,7 +518,7 @@ public class GameController implements GameListener {
                         view.removeChessComponentAtGrid(newSteps.get(i).getDest());
                         view.setChessComponentAtGrid(newSteps.get(i).getDest(),
                                 view.removeChessComponentAtGrid(newSteps.get(i).getSrc()));
-
+                        view.gameFrame.changeCapturedView();
                         removeLastMove();
                         setLastMove(newSteps.get(i).getSrc());
                         setLastMove(newSteps.get(i).getDest());
@@ -523,11 +531,9 @@ public class GameController implements GameListener {
             }
         });
         thread.start();
-
-
-
-
     }
+
+
     private void setCanMove(ChessboardPoint point) {
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 7; j++) {
@@ -540,6 +546,7 @@ public class GameController implements GameListener {
             }
         }
     }
+
     private void setLastMove(ChessboardPoint point){
         view.getGridComponentAt(point).setLastMove(true);
     }
@@ -559,4 +566,14 @@ public class GameController implements GameListener {
             }
         }
     }
+
+    public void openTimer(){
+        this.timerOpen = true;
+    }
+
+    public void closeTimer(){
+        this.timerOpen = false;
+    }
+    //1TODO:更美观的方式显示被吃的棋子，但是想不明白怎么写 re：javaswing是傻逼 哥哥re：确实是傻逼
+
 }

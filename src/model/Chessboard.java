@@ -1,15 +1,11 @@
 package model;
 
-import view.chessView.ElephantChessComponent;
-
-import javax.swing.*;
 import java.util.ArrayList;
 
 import java.util.HashSet;
 import java.util.List;
 
 import static model.Constant.CHESSBOARD_COL_SIZE;
-import static model.Constant.CHESSBOARD_ROW_SIZE;
 
 /**
  * This class store the real chess information.
@@ -20,15 +16,15 @@ public class Chessboard {
     private HashSet<ChessboardPoint> river;
 
     public List<Step> steps;
-    private ArrayList<ChessPiece> redDead;
-    private ArrayList<ChessPiece> blueDead;
+    public ArrayList<ChessPiece> redCaptured;
+    public ArrayList<ChessPiece> blueCaptured;
 
     public Chessboard() {
         this.grid =
                 new Cell[Constant.CHESSBOARD_ROW_SIZE.getNum()][Constant.CHESSBOARD_COL_SIZE.getNum()];//19X19
         this.steps = new ArrayList<>();
-        this.redDead = new ArrayList<>();
-        this.blueDead = new ArrayList<>();
+        this.redCaptured = new ArrayList<>();
+        this.blueCaptured = new ArrayList<>();
         initGrid();
         initPieces();
         HashSet<ChessboardPoint> river2 = new HashSet<>();
@@ -89,20 +85,20 @@ public class Chessboard {
     }
 
     public void initDead(){
-        int size = blueDead.size();
+        int size = blueCaptured.size();
         System.out.println("__");
         System.out.println(size);
         System.out.println("__");
         for (int i = 0; i < size; i++) {
-            this.blueDead.remove(0);
+            this.blueCaptured.remove(0);
             System.out.println("#");
         }
-        size = redDead.size();
+        size = redCaptured.size();
         System.out.println("__");
         System.out.println(size);
         System.out.println("__");
         for (int i = 0; i < size; i++) {
-            this.redDead.remove(0);
+            this.redCaptured.remove(0);
             System.out.println("$");
         }
     }
@@ -133,8 +129,8 @@ public class Chessboard {
         initGrid();
         initPieces();
         this.steps = new ArrayList<>();
-        this.redDead = new ArrayList<>();
-        this.blueDead = new ArrayList<>();
+        this.redCaptured = new ArrayList<>();
+        this.blueCaptured = new ArrayList<>();
     }
 
     public void moveChessPiece(ChessboardPoint src, ChessboardPoint dest) {
@@ -167,9 +163,9 @@ public class Chessboard {
         //有可能出问题  re：看起来没问题
         steps.add(new Step(src, dest, getChessPieceAt(src), getChessPieceAt(dest)));
         if (getChessPieceAt(dest).getOwner().equals(PlayerColor.RED)) {
-            redDead.add(getChessPieceAt(dest));
+            redCaptured.add(getChessPieceAt(dest));
         } else {
-            blueDead.add(getChessPieceAt(dest));
+            blueCaptured.add(getChessPieceAt(dest));
         }
         removeChessPiece(dest);
         setChessPiece(dest, removeChessPiece(src));
@@ -196,7 +192,7 @@ public class Chessboard {
             }
         }
 
-//象，豹，狼，狗，猫的行棋逻辑
+        //象，豹，狼，狗，猫的行棋逻辑
         if (getChessPieceAt(src).getName().equals("Elephant")
                 | getChessPieceAt(src).getName().equals("Leopard")
                 | getChessPieceAt(src).getName().equals("Dog")
@@ -207,7 +203,7 @@ public class Chessboard {
             } else {
                 return calculateDistance(src, dest) == 1;
             }
-//狮，虎的行棋逻辑
+            //狮，虎的行棋逻辑
         } else if (getChessPieceAt(src).getName().equals("Lion")
                 | getChessPieceAt(src).getName().equals("Tiger")) {
             if (river.contains(dest)) {    //判断终点是不是河
@@ -247,7 +243,7 @@ public class Chessboard {
                     return allRiver;
                 }
             }
-//鼠鼠的行棋逻辑
+            //鼠鼠的行棋逻辑
         } else {
             return calculateDistance(src, dest) == 1;
         }
@@ -290,10 +286,10 @@ public class Chessboard {
                 return PlayerColor.RED;
             }
         }
-        if (blueDead.size() == 8) {
+        if (blueCaptured.size() == 8) {
             return PlayerColor.RED;
         }
-        if (redDead.size() == 8) {
+        if (redCaptured.size() == 8) {
             return PlayerColor.BLUE;
         }
         return null;
@@ -303,11 +299,4 @@ public class Chessboard {
         return steps;
     }
 
-    public ArrayList<ChessPiece> getRedDead() {
-        return redDead;
-    }
-
-    public ArrayList<ChessPiece> getBlueDead() {
-        return blueDead;
-    }
 }

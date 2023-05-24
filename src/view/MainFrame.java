@@ -37,6 +37,8 @@ public class MainFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 gameFrame.setVisible(true);
                 setVisible(false);
+                gameFrame.chessboardView.gameController.openTimer();
+
             }
         });
         button.setLocation(WIDTH/2-100, HEIGHT / 10 + 300);

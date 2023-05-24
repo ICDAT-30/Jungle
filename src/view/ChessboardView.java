@@ -29,16 +29,15 @@ public class ChessboardView extends JComponent {
 
     private final Set<ChessboardPoint> denCell = new HashSet<>();
 
-
-
-
     public JLabel statusLabel;
+    public JLabel timeLabel;
     public GameController gameController;
     public GameFrame gameFrame;
 
     public Color color;
-    public ChessboardView(int chessSize, JLabel statusLabel) {
+    public ChessboardView(int chessSize, JLabel statusLabel,JLabel timeLabel) {
         this.statusLabel = statusLabel;
+        this.timeLabel = timeLabel;
         CHESS_SIZE = chessSize;
         int width = CHESS_SIZE * 7;
         int height = CHESS_SIZE * 9;

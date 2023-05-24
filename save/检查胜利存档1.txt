@@ -9,7 +9,7 @@ RED Wolf 2 5 2 6 null
 BLUE Leopard 4 3 3 3 null
 RED Cat 1 5 1 6 null
 BLUE Leopard 3 3 2 3 null
-
+100
 Lion null null null null null Tiger 
 null Dog null null null null Cat 
 Rat null Leopard Leopard null null Wolf 

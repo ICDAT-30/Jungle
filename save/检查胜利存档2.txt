@@ -36,7 +36,7 @@ BLUE Lion 2 5 2 6 RED Tiger
 RED Cat 1 5 2 5 null
 BLUE Wolf 6 2 6 3 null
 RED Lion 2 2 2 3 null
-
+150
 null null null null null null null 
 null null null null null null null 
 Tiger null null Lion null Cat Lion 

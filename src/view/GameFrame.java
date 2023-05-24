@@ -1,28 +1,31 @@
 package view;
 
-import model.PlayerColor;
+import model.ChessPiece;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 这个类表示游戏过程中的整个游戏界面，是一切的载体
  */
 public class GameFrame extends JFrame {
-    //    public final Dimension FRAME_SIZE ;
     private final int WIDTH;
     private final int HEIGHT;
 
     private final int ONE_CHESS_SIZE;
 
     JLabel statusLabel;
+    JLabel timeLabel;
     JLabel background;
     JLabel chessboard;
-    private ChessboardView chessboardView;
+    JLabel[][] captured;
 
+    public ChessboardView chessboardView;
     public MainFrame mainFrame;
+
     public final JLabel bg1;
     public final JLabel bg2;
     public final JLabel cb1;
@@ -69,10 +72,12 @@ public class GameFrame extends JFrame {
 
         background = bg1;
         chessboard = cb1;
+        captured = new JLabel[2][8]; // 第1行red 第2行blue
 
         addStatusLabel();
+        addTimeLabel();
+        addViewingAreaLabel();
         addChessboard();
-
         addResetButton();
         addSaveButton();
         addLoadButton();
@@ -93,20 +98,13 @@ public class GameFrame extends JFrame {
         this.chessboardView = chessboardView;
     }
 
-    /**
-     * 在游戏面板中添加棋盘
-     */
     private void addChessboard() {
-        chessboardView = new ChessboardView(ONE_CHESS_SIZE, this.statusLabel);
+        chessboardView = new ChessboardView(ONE_CHESS_SIZE, this.statusLabel,this.timeLabel);
         chessboardView.gameFrame = this;
         chessboardView.setLocation(HEIGHT / 5, HEIGHT / 10);
         add(chessboardView);
     }
 
-
-    /**
-     * 在游戏面板中添加标签
-     */
     private void addStatusLabel() {
         statusLabel = new JLabel("Turn 1 : BLUE");
         statusLabel.setLocation(HEIGHT - 500, HEIGHT / 10 - 60);
@@ -115,9 +113,29 @@ public class GameFrame extends JFrame {
         add(statusLabel);
     }
 
-    /**
-     * 在游戏面板中增加一个按钮，如果按下的话就会显示Hello, world!
-     */
+    private void addTimeLabel() {
+        timeLabel = new JLabel("0s");
+        timeLabel.setLocation(HEIGHT + 200, HEIGHT / 10 - 60);
+        timeLabel.setSize(280, 60);
+        timeLabel.setFont(new Font("Showcard Gothic", Font.PLAIN, 35));
+        add(timeLabel);
+    }
+
+    private void addViewingAreaLabel() {
+        JLabel redVA = new JLabel("Red Viewing Area");
+        JLabel blueVA = new JLabel("Blue Viewing Area");
+        redVA.setLocation(HEIGHT-50 , HEIGHT / 10 - 60);
+        redVA.setSize(280, 60);
+        redVA.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        redVA.setForeground(new Color(250,128,114,255));
+        add(redVA);
+        blueVA.setLocation(HEIGHT-55, HEIGHT / 10 +4*ONE_CHESS_SIZE+10);
+        blueVA.setSize(280, 60);
+        blueVA.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        blueVA.setForeground(new Color(176,224,230,255));
+        add(blueVA);
+    }
+
     private void addBGButton() {
         JButton button = new JButton("Change Theme");
         button.addActionListener(new AbstractAction() {
@@ -154,7 +172,9 @@ public class GameFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //1TODO re:这为什么打了个todo？删了
-                chessboardView.gameController.reSet();
+                chessboardView.gameController.reset();
+                chessboardView.gameController.time = 0;
+                chessboardView.gameController.openTimer();
                 chessboardView.repaint();
             }
         });
@@ -232,7 +252,6 @@ public class GameFrame extends JFrame {
         add(button);
     }
 
-
     private void addReturnButton() {
         JButton button = new JButton("Return");
         button.addActionListener(new AbstractAction() {
@@ -240,13 +259,69 @@ public class GameFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 mainFrame.setVisible(true);
-                chessboardView.gameController.reSet();
+                chessboardView.gameController.reset();
+                chessboardView.gameController.time = 0;
+                chessboardView.gameController.closeTimer();
             }
         });
         button.setLocation(HEIGHT + 200, HEIGHT / 10 + 560);
         button.setSize(200, 60);
         button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
         add(button);
+    }
+
+    public void changeCapturedView(){
+        List<ChessPiece> redCaptured = chessboardView.gameController.model.redCaptured;
+        List<ChessPiece> blueCaptured = chessboardView.gameController.model.blueCaptured;
+
+        for (int i = 0; i < redCaptured.size(); i++) {
+            ChessPiece chess = redCaptured.get(i);
+            if (chess.getName().equals("Elephant")) captured[0][i] = ImageConstant.redElephant;
+            if (chess.getName().equals("Lion")) captured[0][i] = ImageConstant.redLion;
+            if (chess.getName().equals("Tiger")) captured[0][i] = ImageConstant.redTiger;
+            if (chess.getName().equals("Leopard")) captured[0][i] = ImageConstant.redLeopard;
+            if (chess.getName().equals("Wolf")) captured[0][i] = ImageConstant.redWolf;
+            if (chess.getName().equals("Dog")) captured[0][i] = ImageConstant.redDog;
+            if (chess.getName().equals("Cat")) captured[0][i] = ImageConstant.redCat;
+            if (chess.getName().equals("Rat")) captured[0][i] = ImageConstant.redRat;
+            captured[0][i].setSize(ONE_CHESS_SIZE, ONE_CHESS_SIZE);
+            captured[0][i].setLocation(HEIGHT - 40 + ONE_CHESS_SIZE * (i / 4),
+                    HEIGHT / 10 + ONE_CHESS_SIZE * (i % 4));
+            add(captured[0][i]);
+            repaint();
+            //System.out.println("***");
+        }
+        for (int i = 0; i < blueCaptured.size(); i++) {
+            ChessPiece chess = blueCaptured.get(i);
+            if (chess.getName().equals("Elephant")) captured[1][i] = ImageConstant.blueElephant;
+            if (chess.getName().equals("Lion")) captured[1][i] = ImageConstant.blueLion;
+            if (chess.getName().equals("Tiger")) captured[1][i] = ImageConstant.blueTiger;
+            if (chess.getName().equals("Leopard")) captured[1][i] = ImageConstant.blueLeopard;
+            if (chess.getName().equals("Wolf")) captured[1][i] = ImageConstant.blueWolf;
+            if (chess.getName().equals("Dog")) captured[1][i] = ImageConstant.blueDog;
+            if (chess.getName().equals("Cat")) captured[1][i] = ImageConstant.blueCat;
+            if (chess.getName().equals("Rat")) captured[1][i] = ImageConstant.blueRat;
+            captured[1][i].setSize(ONE_CHESS_SIZE, ONE_CHESS_SIZE);
+            captured[1][i].setLocation(HEIGHT - 40 + ONE_CHESS_SIZE * (i / 4),
+                    HEIGHT / 10 + ONE_CHESS_SIZE * (i % 4 + 5));
+            add(captured[1][i]);
+            repaint();
+            //System.out.println("***");
+        }
+        remove(background);
+        add(background);
+    }
+
+    public void removeCapturedView(){
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (captured[i][j] != null) {
+                    remove(captured[i][j]);
+                    captured[i][j] = null;
+                }
+            }
+        }
+        repaint();
     }
 
 }

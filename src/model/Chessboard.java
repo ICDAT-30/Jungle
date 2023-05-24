@@ -251,9 +251,14 @@ public class Chessboard {
 
 
     public boolean isValidCapture(ChessboardPoint src, ChessboardPoint dest) {
-        if (getChessPieceAt(src) != null & getChessPieceAt(dest) != null) {
-            if (getChessPieceOwner(src) != getChessPieceOwner(dest))
+        if (getChessPieceAt(src) != null && getChessPieceAt(dest) != null) {
+            if (getChessPieceOwner(src) != getChessPieceOwner(dest)){
+                if (getChessPieceAt(src).getName().equals("Rat")){
+                    return  !river.contains(src) && getChessPieceAt(src).canCapture(getChessPieceAt(dest)) && isValidMove(src, dest);
+                }
                 return getChessPieceAt(src).canCapture(getChessPieceAt(dest)) && isValidMove(src, dest);
+            }
+
         }
         return false;
     }

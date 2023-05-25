@@ -237,7 +237,7 @@ public class GameController implements GameListener {
     }
 
     public void load() throws IOException {
-        closeTimer();
+
         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new File("save"));
         chooser.showOpenDialog(view);

@@ -180,6 +180,8 @@ public class GameFrame extends JFrame {
         button.setLocation(HEIGHT + 200, HEIGHT / 10);
         button.setSize(200, 60);
         button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
         add(button);
     }
 
@@ -233,6 +235,7 @@ public class GameFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     chessboardView.gameController.load();
+                    chessboardView.gameController.openTimer();
 
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);

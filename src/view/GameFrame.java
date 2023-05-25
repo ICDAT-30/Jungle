@@ -19,6 +19,12 @@ public class GameFrame extends JFrame {
 
     JLabel statusLabel;
     JLabel timeLabel;
+    JLabel redViewLabel;
+    JLabel blueViewLabel;
+    JButton loadButton;
+    JButton regretButton;
+    JButton playBackButton;
+    JButton returnButton;
     JLabel background;
     JLabel chessboard;
     JLabel[][] captured;
@@ -88,6 +94,10 @@ public class GameFrame extends JFrame {
         add(chessboard);
         add(background);
 
+        loadButton.setForeground(new Color(207, 243, 252));
+        regretButton.setForeground(new Color(207, 243, 252));
+        playBackButton.setForeground(new Color(207, 243, 252));
+        returnButton.setForeground(new Color(207, 243, 252));
     }
 
     public ChessboardView getChessboardView() {
@@ -122,18 +132,18 @@ public class GameFrame extends JFrame {
     }
 
     private void addViewingAreaLabel() {
-        JLabel redVA = new JLabel("Red Viewing Area");
-        JLabel blueVA = new JLabel("Blue Viewing Area");
-        redVA.setLocation(HEIGHT-50 , HEIGHT / 10 - 60);
-        redVA.setSize(280, 60);
-        redVA.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
-        redVA.setForeground(new Color(250,128,114,255));
-        add(redVA);
-        blueVA.setLocation(HEIGHT-55, HEIGHT / 10 +4*ONE_CHESS_SIZE+10);
-        blueVA.setSize(280, 60);
-        blueVA.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
-        blueVA.setForeground(new Color(176,224,230,255));
-        add(blueVA);
+        redViewLabel = new JLabel("Red Viewing Area");
+        blueViewLabel = new JLabel("Blue Viewing Area");
+        redViewLabel.setLocation(HEIGHT-50 , HEIGHT / 10 - 60);
+        redViewLabel.setSize(280, 60);
+        redViewLabel.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        redViewLabel.setForeground(new Color(250,128,114,255));
+        add(redViewLabel);
+        blueViewLabel.setLocation(HEIGHT-55, HEIGHT / 10 +4*ONE_CHESS_SIZE+10);
+        blueViewLabel.setSize(280, 60);
+        blueViewLabel.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        blueViewLabel.setForeground(new Color(176,224,230,255));
+        add(blueViewLabel);
     }
 
     private void addBGButton() {
@@ -147,11 +157,18 @@ public class GameFrame extends JFrame {
                     background = bg2;
                     remove(chessboard);
                     chessboard = cb2;
+                    blueViewLabel.setForeground(new Color(23, 141, 192));
+//                    loadButton.setForeground(new Color(207, 243, 252));
+//                    regretButton.setForeground(new Color(207, 243, 252));
+//                    playBackButton.setForeground(new Color(207, 243, 252));
+//                    returnButton.setForeground(new Color(207, 243, 252));
                 } else {
                     remove(background);
                     background = bg1;
                     remove(chessboard);
                     chessboard = cb1;
+                    blueViewLabel.setForeground(new Color(176,224,230));
+
                 }
 
                 add(chessboard);
@@ -181,6 +198,8 @@ public class GameFrame extends JFrame {
         button.setLocation(HEIGHT + 200, HEIGHT / 10 + 100);
         button.setSize(200, 60);
         button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
         add(button);
     }
 
@@ -202,12 +221,14 @@ public class GameFrame extends JFrame {
         button.setLocation(HEIGHT + 200, HEIGHT / 10 + 200);
         button.setSize(200, 60);
         button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
         add(button);
     }
 
     private void addLoadButton() {
-        JButton button = new JButton("Load");
-        button.addActionListener(new AbstractAction() {
+        loadButton = new JButton("Load");
+        loadButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -218,43 +239,49 @@ public class GameFrame extends JFrame {
                 }
             }
         });
-        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 280);
-        button.setSize(200, 60);
-        button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
-        add(button);
+        loadButton.setLocation(HEIGHT + 200, HEIGHT / 10 + 280);
+        loadButton.setSize(200, 60);
+        loadButton.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        loadButton.setBorderPainted(false);
+        loadButton.setContentAreaFilled(false);
+        add(loadButton);
     }
 
     private void addRegretButton() {
-        JButton button = new JButton("Regret");
-        button.addActionListener(new AbstractAction() {
+        regretButton = new JButton("Regret");
+        regretButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 chessboardView.gameController.regret();
             }
         });
-        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 380);
-        button.setSize(200, 60);
-        button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
-        add(button);
+        regretButton.setLocation(HEIGHT + 200, HEIGHT / 10 + 380);
+        regretButton.setSize(200, 60);
+        regretButton.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        regretButton.setBorderPainted(false);
+        regretButton.setContentAreaFilled(false);
+        add(regretButton);
     }
 
     private void addPBButton() {
-        JButton button = new JButton("Play Back");
-        button.addActionListener(new AbstractAction() {
+        playBackButton = new JButton("Play Back");
+        playBackButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 chessboardView.gameController.playBack();
             }
         });
-        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 460);
-        button.setSize(200, 60);
-        button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
-        add(button);
+        playBackButton.setLocation(HEIGHT + 200, HEIGHT / 10 + 460);
+        playBackButton.setSize(200, 60);
+        playBackButton.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        playBackButton.setBorderPainted(false);
+        playBackButton.setContentAreaFilled(false);
+        add(playBackButton);
     }
 
     private void addReturnButton() {
-        JButton button = new JButton("Return");
-        button.addActionListener(new AbstractAction() {
+        returnButton = new JButton("Return");
+        returnButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
@@ -264,10 +291,12 @@ public class GameFrame extends JFrame {
                 chessboardView.gameController.closeTimer();
             }
         });
-        button.setLocation(HEIGHT + 200, HEIGHT / 10 + 560);
-        button.setSize(200, 60);
-        button.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
-        add(button);
+        returnButton.setLocation(HEIGHT + 200, HEIGHT / 10 + 560);
+        returnButton.setSize(200, 60);
+        returnButton.setFont(new Font("Showcard Gothic", Font.PLAIN, 20));
+        returnButton.setBorderPainted(false);
+        returnButton.setContentAreaFilled(false);
+        add(returnButton);
     }
 
     public void changeCapturedView(){
